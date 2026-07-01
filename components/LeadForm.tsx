@@ -10,6 +10,20 @@ type LeadFormProps = {
 
 const phoneNumber = "34644241706";
 
+function getTrackingParams() {
+  const params = new URLSearchParams(window.location.search);
+
+  return {
+    landingPage: window.location.href,
+    referrer: document.referrer,
+    utmSource: params.get("utm_source") ?? "",
+    utmMedium: params.get("utm_medium") ?? "",
+    utmCampaign: params.get("utm_campaign") ?? "",
+    utmTerm: params.get("utm_term") ?? "",
+    utmContent: params.get("utm_content") ?? "",
+  };
+}
+
 export default function LeadForm({
   treatmentName,
   compact = false,
@@ -22,11 +36,13 @@ export default function LeadForm({
 
   const message = useMemo(() => {
     const selectedTreatment = interest || treatmentName || "una valoración";
+
     return [
-      "Hola, quiero solicitar una valoración.",
-      `Tratamiento: ${selectedTreatment}`,
+      "Hola, quiero solicitar una valoración médica con la Dra. Luciana Karki Martín.",
+      `Me interesa: ${selectedTreatment}`,
       name ? `Nombre: ${name}` : "",
       phone ? `Teléfono: ${phone}` : "",
+      "Quedo pendiente para coordinar disponibilidad. Gracias.",
     ]
       .filter(Boolean)
       .join("\n");
@@ -36,6 +52,8 @@ export default function LeadForm({
     event.preventDefault();
     setIsSubmitting(true);
     setStatus("idle");
+
+    const formData = new FormData(event.currentTarget);
 
     try {
       const response = await fetch("/api/leads", {
@@ -49,6 +67,8 @@ export default function LeadForm({
           treatment: interest || treatmentName || "Valoración",
           page: window.location.pathname,
           message,
+          website: formData.get("website"),
+          ...getTrackingParams(),
         }),
       });
 
@@ -74,7 +94,7 @@ export default function LeadForm({
       }`}
     >
       <div>
-        <span className="uppercase tracking-[0.25em] text-[#d9a8b5] text-xs">
+        <span className="text-xs uppercase tracking-[0.25em] text-[#d9a8b5]">
           Valoración
         </span>
         <h3
@@ -150,6 +170,14 @@ export default function LeadForm({
             type="text"
           />
         </label>
+
+        <input
+          className="hidden"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+        />
       </div>
 
       <button

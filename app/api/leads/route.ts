@@ -5,23 +5,68 @@ import { z } from "zod";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 6;
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>();
+
 const leadSchema = z.object({
   name: z.string().trim().min(2).max(120),
-  phone: z.string().trim().min(6).max(40),
+  phone: z
+    .string()
+    .trim()
+    .min(6)
+    .max(40)
+    .regex(/^[+\d\s().-]+$/, "Invalid phone format"),
   treatment: z.string().trim().max(160).optional().default("Valoración"),
   page: z.string().trim().max(300).optional().default(""),
   message: z.string().trim().max(1000).optional().default(""),
+  website: z.string().trim().max(200).optional().default(""),
+  landingPage: z.string().trim().max(700).optional().default(""),
+  referrer: z.string().trim().max(700).optional().default(""),
+  utmSource: z.string().trim().max(120).optional().default(""),
+  utmMedium: z.string().trim().max(120).optional().default(""),
+  utmCampaign: z.string().trim().max(160).optional().default(""),
+  utmTerm: z.string().trim().max(160).optional().default(""),
+  utmContent: z.string().trim().max(160).optional().default(""),
 });
 
-type Lead = z.infer<typeof leadSchema> & {
+type LeadInput = z.infer<typeof leadSchema>;
+
+type Lead = Omit<LeadInput, "website"> & {
   id: string;
   createdAt: string;
   source: string;
   userAgent: string;
+  ip: string;
 };
 
 function jsonResponse(body: unknown, status = 200) {
   return Response.json(body, { status });
+}
+
+function getClientIp(request: Request) {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const realIp = request.headers.get("x-real-ip");
+
+  return forwardedFor?.split(",")[0]?.trim() || realIp || "unknown";
+}
+
+function isRateLimited(ip: string) {
+  const now = Date.now();
+  const current = rateLimitStore.get(ip);
+
+  if (!current || current.resetAt <= now) {
+    rateLimitStore.set(ip, {
+      count: 1,
+      resetAt: now + RATE_LIMIT_WINDOW_MS,
+    });
+    return false;
+  }
+
+  current.count += 1;
+  rateLimitStore.set(ip, current);
+
+  return current.count > RATE_LIMIT_MAX_REQUESTS;
 }
 
 async function appendLeadLocally(lead: Lead) {
@@ -79,6 +124,8 @@ async function sendLeadToWebhook(lead: Lead) {
 }
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+
   try {
     const rawLead = await request.json();
     const parsedLead = leadSchema.safeParse(rawLead);
@@ -93,12 +140,45 @@ export async function POST(request: Request) {
       );
     }
 
+    if (parsedLead.data.website) {
+      return jsonResponse({
+        ok: true,
+        destination: "spam-filter",
+      });
+    }
+
+    if (isRateLimited(ip)) {
+      return jsonResponse(
+        {
+          ok: false,
+          error:
+            "Hemos recibido varias solicitudes seguidas. Inténtalo nuevamente en unos minutos.",
+        },
+        429,
+      );
+    }
+
     const lead: Lead = {
-      ...parsedLead.data,
+      name: parsedLead.data.name,
+      phone: parsedLead.data.phone,
+      treatment: parsedLead.data.treatment,
+      page: parsedLead.data.page,
+      message: parsedLead.data.message,
+      landingPage: parsedLead.data.landingPage,
+      referrer: parsedLead.data.referrer,
+      utmSource: parsedLead.data.utmSource,
+      utmMedium: parsedLead.data.utmMedium,
+      utmCampaign: parsedLead.data.utmCampaign,
+      utmTerm: parsedLead.data.utmTerm,
+      utmContent: parsedLead.data.utmContent,
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
-      source: request.headers.get("referer") ?? parsedLead.data.page,
+      source:
+        request.headers.get("referer") ??
+        parsedLead.data.landingPage ??
+        parsedLead.data.page,
       userAgent: request.headers.get("user-agent") ?? "",
+      ip,
     };
 
     const destination = await sendLeadToWebhook(lead);

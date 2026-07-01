@@ -61,7 +61,26 @@ npm run dev
 - Teléfono
 - Tratamiento
 - Página
+- Landing page
+- Referrer
 - Mensaje
 - Origen
+- UTM source
+- UTM medium
+- UTM campaign
+- UTM term
+- UTM content
+- IP
 - User Agent
 - ID
+
+## Si el script ya estaba instalado
+
+Si la web ya estaba conectada a Google Sheets con una versión anterior, reemplaza
+el código de Apps Script por el contenido actualizado de:
+
+```txt
+docs/google-apps-script-leads.js
+```
+
+Después publica una nueva implementación y usa la nueva URL `/exec` en Vercel.
