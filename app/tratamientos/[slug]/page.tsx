@@ -23,7 +23,12 @@ import {
   treatmentJsonLd,
   treatmentKeywords,
 } from "@/lib/seo";
-import { getTreatmentBySlug, treatments } from "@/lib/treatments";
+import {
+  getTreatmentBySlug,
+  treatments,
+  type Treatment,
+  type TreatmentDetails,
+} from "@/lib/treatments";
 
 type TreatmentPageProps = {
   params: Promise<{
@@ -31,17 +36,11 @@ type TreatmentPageProps = {
   }>;
 };
 
-type TreatmentDetails = NonNullable<(typeof treatments)[number]["details"]>;
-
-function getPageDetails(treatment: (typeof treatments)[number]): TreatmentDetails {
-  if (treatment.details) {
-    return treatment.details;
-  }
-
+function getPageDetails(treatment: Treatment): TreatmentDetails {
   const isBody = treatment.category.includes("Corporales");
   const isBiostimulator = treatment.category.includes("Bioestimuladores");
 
-  return {
+  const defaultDetails: TreatmentDetails = {
     duration: isBody ? "45-60 min aprox." : "30-45 min aprox.",
     technique: isBiostimulator
       ? "Bioestimulación médica con protocolo personalizado"
@@ -64,6 +63,11 @@ function getPageDetails(treatment: (typeof treatments)[number]): TreatmentDetail
       "Evitar manipular la zona, calor intenso, ejercicio fuerte y exposición solar directa durante las primeras 24-48 h, salvo indicación específica.",
     precautions:
       "La indicación se confirma en valoración médica. Se revisan antecedentes, zona a tratar y expectativas antes de realizar cualquier procedimiento.",
+  };
+
+  return {
+    ...defaultDetails,
+    ...treatment.details,
   };
 }
 
