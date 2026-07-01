@@ -4,23 +4,31 @@ const promotions = [
   {
     src: "/images/tratamiento-1.jpeg",
     alt: "Promoción de relleno de labios con ácido hialurónico",
+    shape: "compact",
   },
   {
     src: "/images/tratamiento-2.jpeg",
     alt: "Promoción pack anti-age completo",
+    shape: "compact",
   },
   {
     src: "/images/tratamiento-3.jpeg",
     alt: "Promoción de medicina estética",
+    shape: "tall",
+  },
+  {
+    src: "/images/tratamiento-4.png",
+    alt: "Promoción peeling axilas y zona íntima",
+    shape: "tall",
   },
 ];
 
 export default function Gallery() {
   return (
-    <section className="py-20 bg-white lg:py-28">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="bg-white py-20 lg:py-28">
+      <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto mb-14 max-w-3xl text-center">
-          <span className="uppercase tracking-[0.3em] text-[#d9a8b5] text-sm">
+          <span className="text-sm uppercase tracking-[0.3em] text-[#d9a8b5]">
             Promociones
           </span>
 
@@ -34,19 +42,25 @@ export default function Gallery() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {promotions.map((promotion) => (
             <div
               key={promotion.src}
-              className="overflow-hidden rounded-[24px] bg-[#faf7f8] shadow-md"
+              className="overflow-hidden rounded-[28px] border border-[#ead1d9] bg-[#fffafb] p-3 shadow-[0_18px_50px_rgba(107,91,99,0.12)]"
             >
-              <Image
-                src={promotion.src}
-                alt={promotion.alt}
-                width={700}
-                height={700}
-                className="h-auto w-full"
-              />
+              <div
+                className={`relative overflow-hidden rounded-[22px] bg-white ${
+                  promotion.shape === "compact" ? "aspect-square" : "aspect-[9/16]"
+                }`}
+              >
+                <Image
+                  src={promotion.src}
+                  alt={promotion.alt}
+                  fill
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                  className="object-cover"
+                />
+              </div>
             </div>
           ))}
         </div>
