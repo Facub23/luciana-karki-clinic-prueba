@@ -1,4 +1,5 @@
 import { CheckCircle2 } from "lucide-react";
+import TrackedAnchor from "@/components/TrackedAnchor";
 
 const principles = [
   "Valoración individual antes de indicar cualquier tratamiento",
@@ -8,11 +9,11 @@ const principles = [
 
 export default function About() {
   return (
-    <section id="sobre" className="py-20 bg-white lg:py-28">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="sobre" className="bg-white py-20 lg:py-28">
+      <div className="mx-auto max-w-7xl px-6">
         <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-start">
           <div>
-            <span className="uppercase tracking-[0.3em] text-[#d9a8b5] text-sm">
+            <span className="text-sm uppercase tracking-[0.3em] text-[#d9a8b5]">
               Sobre la doctora
             </span>
 
@@ -47,14 +48,16 @@ export default function About() {
               ))}
             </div>
 
-            <a
+            <TrackedAnchor
               href="https://wa.me/34644241706"
               target="_blank"
               rel="noopener noreferrer"
+              eventName="whatsapp_click"
+              eventPayload={{ location: "about_cta" }}
               className="mt-9 inline-flex rounded-full bg-[#d9a8b5] px-8 py-4 font-medium text-white transition hover:opacity-90"
             >
               Solicitar valoración
-            </a>
+            </TrackedAnchor>
           </div>
         </div>
       </div>

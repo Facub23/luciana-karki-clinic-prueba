@@ -2,6 +2,7 @@
 
 import { FormEvent, useMemo, useState } from "react";
 import { Loader2, MessageCircle } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
 
 type LeadFormProps = {
   treatmentName?: string;
@@ -73,11 +74,29 @@ export default function LeadForm({
       });
 
       setStatus(response.ok ? "saved" : "error");
+
+      trackEvent("lead_form_submit", {
+        status: response.ok ? "saved" : "error",
+        treatment: interest || treatmentName || "Valoración",
+        page: window.location.pathname,
+      });
     } catch {
       setStatus("error");
+
+      trackEvent("lead_form_submit", {
+        status: "error",
+        treatment: interest || treatmentName || "Valoración",
+        page: window.location.pathname,
+      });
     } finally {
       setIsSubmitting(false);
     }
+
+    trackEvent("whatsapp_click", {
+      location: compact ? "compact_lead_form" : "lead_form",
+      treatment: interest || treatmentName || "Valoración",
+      page: window.location.pathname,
+    });
 
     window.open(
       `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,

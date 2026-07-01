@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import TrackedLink from "@/components/TrackedLink";
 import { treatments } from "@/lib/treatments";
 
 export default function TreatmentsSection() {
@@ -50,13 +50,19 @@ export default function TreatmentsSection() {
               </span>
             </div>
 
-            <Link
+            <TrackedLink
               href={`/tratamientos/${treatment.slug}`}
+              eventName="treatment_interest"
+              eventPayload={{
+                treatment: treatment.name,
+                slug: treatment.slug,
+                location: "treatments_grid",
+              }}
               className="mt-6 inline-flex items-center justify-center gap-2 rounded-full border border-[#d9a8b5] px-5 py-2.5 text-sm font-medium text-[#b9788d] transition hover:bg-[#c98fa1] hover:text-white"
             >
               Ver tratamiento
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
-            </Link>
+            </TrackedLink>
           </article>
         ))}
       </div>

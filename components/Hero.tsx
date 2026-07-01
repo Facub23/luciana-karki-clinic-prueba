@@ -1,9 +1,10 @@
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
+import TrackedAnchor from "@/components/TrackedAnchor";
 
 export default function Hero() {
   return (
-    <section id="inicio" className="max-w-7xl mx-auto px-6 py-16 lg:py-24">
+    <section id="inicio" className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
       <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
         <div className="flex flex-col">
           <div className="max-w-xl">
@@ -11,7 +12,7 @@ export default function Hero() {
           </div>
 
           <div className="mt-8 lg:mt-10">
-            <span className="uppercase tracking-[0.24em] text-[#d9a8b5] text-xs sm:text-sm">
+            <span className="text-xs uppercase tracking-[0.24em] text-[#d9a8b5] sm:text-sm">
               Barcelona · Alicante
             </span>
 
@@ -30,14 +31,16 @@ export default function Hero() {
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <a
+              <TrackedAnchor
                 href="https://wa.me/34644241706"
                 target="_blank"
                 rel="noopener noreferrer"
+                eventName="whatsapp_click"
+                eventPayload={{ location: "hero_cta" }}
                 className="rounded-full bg-[#d9a8b5] px-8 py-4 text-center font-medium text-white"
               >
                 Reservar valoración
-              </a>
+              </TrackedAnchor>
 
               <a
                 href="#tratamientos"

@@ -1,5 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
+import TrackedAnchor from "@/components/TrackedAnchor";
+import TrackedLink from "@/components/TrackedLink";
 import { treatments } from "@/lib/treatments";
 
 const treatmentColumns = [
@@ -31,8 +32,8 @@ export default function Footer() {
             </h3>
 
             <p className="mt-4 max-w-sm text-white/80">
-              Medicina estética avanzada en Barcelona y Alicante, con
-              valoración médica y planes personalizados.
+              Medicina estética avanzada en Barcelona y Alicante, con valoración
+              médica y planes personalizados.
             </p>
 
             <div className="mt-6 space-y-2 text-white/80">
@@ -51,14 +52,16 @@ export default function Footer() {
                 Instagram
               </a>
 
-              <a
+              <TrackedAnchor
                 href="https://wa.me/34644241706"
                 target="_blank"
                 rel="noopener noreferrer"
+                eventName="whatsapp_click"
+                eventPayload={{ location: "footer_link" }}
                 className="text-white/80 underline-offset-4 hover:text-white hover:underline"
               >
                 WhatsApp
-              </a>
+              </TrackedAnchor>
             </div>
           </div>
 
@@ -70,12 +73,18 @@ export default function Footer() {
                 <ul key={index} className="space-y-3">
                   {column.map((treatment) => (
                     <li key={treatment.slug}>
-                      <Link
+                      <TrackedLink
                         href={`/tratamientos/${treatment.slug}`}
+                        eventName="treatment_interest"
+                        eventPayload={{
+                          treatment: treatment.name,
+                          slug: treatment.slug,
+                          location: "footer",
+                        }}
                         className="text-sm leading-6 text-white/80 underline-offset-4 transition hover:text-white hover:underline"
                       >
                         {treatment.name}
-                      </Link>
+                      </TrackedLink>
                     </li>
                   ))}
                 </ul>

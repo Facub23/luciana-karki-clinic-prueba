@@ -1,6 +1,7 @@
 import { CalendarCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import TrackedAnchor from "@/components/TrackedAnchor";
 
 export default function Navbar() {
   return (
@@ -57,16 +58,18 @@ export default function Navbar() {
           </Link>
         </nav>
 
-        <a
+        <TrackedAnchor
           href="https://wa.me/34644241706"
           target="_blank"
           rel="noopener noreferrer"
+          eventName="whatsapp_click"
+          eventPayload={{ location: "navbar_cta" }}
           className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#c98fa1] px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(201,143,161,0.32)] transition hover:-translate-y-0.5 hover:bg-[#bd7f93] sm:px-5"
         >
           <CalendarCheck className="h-4 w-4" aria-hidden="true" />
           <span className="sm:hidden">Cita</span>
           <span className="hidden sm:inline">Reservar cita</span>
-        </a>
+        </TrackedAnchor>
       </div>
     </header>
   );
