@@ -10,7 +10,7 @@ export default function Hero() {
             <LeadForm compact />
           </div>
 
-          <div className="mt-12">
+          <div className="mt-8 lg:mt-10">
             <span className="uppercase tracking-[0.24em] text-[#d9a8b5] text-xs sm:text-sm">
               Barcelona · Alicante
             </span>

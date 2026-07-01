@@ -70,28 +70,42 @@ export default function LeadForm({
     <form
       onSubmit={handleSubmit}
       className={`bg-white border border-pink-100 shadow-lg ${
-        compact ? "rounded-3xl p-6" : "rounded-[32px] p-8"
+        compact ? "rounded-3xl p-5 sm:p-6" : "rounded-[32px] p-8"
       }`}
     >
       <div>
         <span className="uppercase tracking-[0.25em] text-[#d9a8b5] text-xs">
           Valoración
         </span>
-        <h3 className="mt-3 text-2xl font-light text-[#6b5b63]">
+        <h3
+          className={`font-light text-[#6b5b63] ${
+            compact ? "mt-2 text-xl sm:text-2xl" : "mt-3 text-2xl"
+          }`}
+        >
           Reserva tu consulta
         </h3>
-        <p className="mt-3 text-sm leading-6 text-gray-600">
+        <p
+          className={`text-sm leading-6 text-gray-600 ${
+            compact ? "mt-2" : "mt-3"
+          }`}
+        >
           Completa tus datos y abre WhatsApp con el mensaje listo para reservar.
         </p>
       </div>
 
-      <div className="mt-6 space-y-4">
+      <div
+        className={`grid gap-3 ${
+          compact ? "mt-4 sm:grid-cols-2" : "mt-6"
+        }`}
+      >
         <label className="block">
           <span className="text-sm text-[#6b5b63]">Nombre</span>
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            className="mt-2 w-full rounded-2xl border border-pink-100 px-4 py-3 outline-none focus:border-[#d9a8b5]"
+            className={`mt-2 w-full rounded-2xl border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
+              compact ? "py-2.5" : "py-3"
+            }`}
             placeholder="Tu nombre"
             type="text"
             required
@@ -103,19 +117,23 @@ export default function LeadForm({
           <input
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
-            className="mt-2 w-full rounded-2xl border border-pink-100 px-4 py-3 outline-none focus:border-[#d9a8b5]"
+            className={`mt-2 w-full rounded-2xl border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
+              compact ? "py-2.5" : "py-3"
+            }`}
             placeholder="+34..."
             type="tel"
             required
           />
         </label>
 
-        <label className="block">
+        <label className={compact ? "block sm:col-span-2" : "block"}>
           <span className="text-sm text-[#6b5b63]">Tratamiento</span>
           <input
             value={interest}
             onChange={(event) => setInterest(event.target.value)}
-            className="mt-2 w-full rounded-2xl border border-pink-100 px-4 py-3 outline-none focus:border-[#d9a8b5]"
+            className={`mt-2 w-full rounded-2xl border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
+              compact ? "py-2.5" : "py-3"
+            }`}
             placeholder="Tratamiento que te interesa"
             type="text"
           />
@@ -125,7 +143,9 @@ export default function LeadForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#d9a8b5] px-6 py-4 font-medium text-white transition hover:opacity-90 disabled:cursor-wait disabled:opacity-70"
+        className={`flex w-full items-center justify-center gap-2 rounded-full bg-[#d9a8b5] px-6 font-medium text-white transition hover:opacity-90 disabled:cursor-wait disabled:opacity-70 ${
+          compact ? "mt-4 py-3.5" : "mt-6 py-4"
+        }`}
       >
         {isSubmitting ? (
           <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
