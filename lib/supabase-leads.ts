@@ -109,6 +109,25 @@ export async function fetchAdminLeadEvents() {
   }
 }
 
+export async function fetchAdminLeadById(id: string) {
+  const [lead] = await supabaseRequest<LeadRecord[]>(
+    `leads?select=*&id=eq.${encodeURIComponent(id)}&limit=1`,
+  );
+
+  return lead ?? null;
+}
+
+export async function fetchAdminLeadEventsByLeadId(id: string) {
+  try {
+    return await supabaseRequest<LeadEvent[]>(
+      `lead_events?select=*&lead_id=eq.${encodeURIComponent(id)}&order=created_at.desc&limit=200`,
+    );
+  } catch (error) {
+    console.error("Supabase lead events fetch failed", error);
+    return [];
+  }
+}
+
 export async function createLeadEvent(
   leadId: string,
   event: {
