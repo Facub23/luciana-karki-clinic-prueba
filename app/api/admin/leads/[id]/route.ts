@@ -18,7 +18,17 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  const body = await request.json();
+  let body: unknown;
+
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json(
+      { ok: false, error: "Solicitud inválida" },
+      { status: 400 },
+    );
+  }
+
   const parsedBody = updateLeadSchema.safeParse(body);
 
   if (!parsedBody.success) {
