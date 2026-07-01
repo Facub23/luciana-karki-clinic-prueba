@@ -127,7 +127,20 @@ export async function POST(request: Request) {
   const ip = getClientIp(request);
 
   try {
-    const rawLead = await request.json();
+    let rawLead: unknown;
+
+    try {
+      rawLead = await request.json();
+    } catch {
+      return jsonResponse(
+        {
+          ok: false,
+          error: "Solicitud inválida. Revisa el formato de los datos.",
+        },
+        400,
+      );
+    }
+
     const parsedLead = leadSchema.safeParse(rawLead);
 
     if (!parsedLead.success) {
