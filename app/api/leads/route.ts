@@ -40,6 +40,11 @@ type Lead = Omit<LeadInput, "website"> & {
   ip: string;
 };
 
+type DeliveryResult = {
+  destination: "webhook" | "local" | "webhook_failed";
+  warning?: string;
+};
+
 function jsonResponse(body: unknown, status = 200) {
   return Response.json(body, { status });
 }
@@ -69,6 +74,83 @@ function isRateLimited(ip: string) {
   return current.count > RATE_LIMIT_MAX_REQUESTS;
 }
 
+function formatLeadForEmail(lead: Lead, delivery: DeliveryResult) {
+  return [
+    `Nuevo lead de ${lead.name}`,
+    "",
+    `Nombre: ${lead.name}`,
+    `Teléfono: ${lead.phone}`,
+    `Tratamiento: ${lead.treatment}`,
+    `Página: ${lead.page || "-"}`,
+    `Landing page: ${lead.landingPage || "-"}`,
+    `Referrer: ${lead.referrer || "-"}`,
+    `Origen: ${lead.source || "-"}`,
+    `UTM source: ${lead.utmSource || "-"}`,
+    `UTM medium: ${lead.utmMedium || "-"}`,
+    `UTM campaign: ${lead.utmCampaign || "-"}`,
+    `Destino backend: ${delivery.destination}`,
+    delivery.warning ? `Aviso: ${delivery.warning}` : "",
+    "",
+    "Mensaje preparado:",
+    lead.message || "-",
+    "",
+    `ID: ${lead.id}`,
+    `Fecha: ${lead.createdAt}`,
+    `IP: ${lead.ip}`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatLeadHtmlForEmail(lead: Lead, delivery: DeliveryResult) {
+  const rows = [
+    ["Nombre", lead.name],
+    ["Teléfono", lead.phone],
+    ["Tratamiento", lead.treatment],
+    ["Página", lead.page || "-"],
+    ["Landing page", lead.landingPage || "-"],
+    ["Referrer", lead.referrer || "-"],
+    ["Origen", lead.source || "-"],
+    ["UTM source", lead.utmSource || "-"],
+    ["UTM medium", lead.utmMedium || "-"],
+    ["UTM campaign", lead.utmCampaign || "-"],
+    ["Destino backend", delivery.destination],
+    ["Aviso", delivery.warning || "-"],
+    ["ID", lead.id],
+    ["Fecha", lead.createdAt],
+    ["IP", lead.ip],
+  ];
+
+  return `
+    <div style="font-family:Arial,sans-serif;color:#2f2630;line-height:1.5">
+      <h2 style="margin:0 0 16px">Nuevo lead de la web</h2>
+      <table style="border-collapse:collapse;width:100%;max-width:720px">
+        ${rows
+          .map(
+            ([label, value]) => `
+              <tr>
+                <td style="border:1px solid #ead1d9;padding:8px;font-weight:700;background:#fff7fa">${label}</td>
+                <td style="border:1px solid #ead1d9;padding:8px">${escapeHtml(value)}</td>
+              </tr>
+            `,
+          )
+          .join("")}
+      </table>
+      <h3 style="margin:20px 0 8px">Mensaje preparado</h3>
+      <pre style="white-space:pre-wrap;background:#faf7f8;border:1px solid #ead1d9;padding:12px;border-radius:10px">${escapeHtml(lead.message || "-")}</pre>
+    </div>
+  `;
+}
+
 async function appendLeadLocally(lead: Lead) {
   const dataDir = path.join(process.cwd(), "data");
   const filePath = path.join(dataDir, "leads.json");
@@ -93,7 +175,7 @@ async function sendLeadToWebhook(lead: Lead) {
 
   if (!webhookUrl) {
     await appendLeadLocally(lead);
-    return "local";
+    return "local" as const;
   }
 
   const response = await fetch(webhookUrl, {
@@ -120,7 +202,64 @@ async function sendLeadToWebhook(lead: Lead) {
     throw new Error("Webhook response was not valid JSON");
   }
 
-  return "webhook";
+  return "webhook" as const;
+}
+
+async function deliverLead(lead: Lead): Promise<DeliveryResult> {
+  try {
+    const destination = await sendLeadToWebhook(lead);
+    return { destination };
+  } catch (error) {
+    console.error("Lead webhook delivery failed", error);
+
+    try {
+      await appendLeadLocally(lead);
+    } catch (localError) {
+      console.error("Lead local fallback failed", localError);
+    }
+
+    return {
+      destination: "webhook_failed",
+      warning:
+        "Google Sheets no confirmó el guardado. El usuario igualmente continuará por WhatsApp.",
+    };
+  }
+}
+
+async function sendLeadEmailNotification(lead: Lead, delivery: DeliveryResult) {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  const notificationTo = process.env.LEAD_NOTIFICATION_EMAIL_TO;
+  const notificationFrom =
+    process.env.LEAD_NOTIFICATION_EMAIL_FROM ||
+    "Dra. Luciana Karki <onboarding@resend.dev>";
+
+  if (!resendApiKey || !notificationTo) {
+    return "skipped";
+  }
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: notificationFrom,
+      to: notificationTo
+        .split(",")
+        .map((email) => email.trim())
+        .filter(Boolean),
+      subject: `Nuevo lead: ${lead.treatment} - ${lead.name}`,
+      text: formatLeadForEmail(lead, delivery),
+      html: formatLeadHtmlForEmail(lead, delivery),
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Email notification failed with status ${response.status}`);
+  }
+
+  return "sent";
 }
 
 export async function POST(request: Request) {
@@ -187,18 +326,28 @@ export async function POST(request: Request) {
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
       source:
-        request.headers.get("referer") ??
-        parsedLead.data.landingPage ??
+        request.headers.get("referer") ||
+        parsedLead.data.landingPage ||
         parsedLead.data.page,
       userAgent: request.headers.get("user-agent") ?? "",
       ip,
     };
 
-    const destination = await sendLeadToWebhook(lead);
+    const delivery = await deliverLead(lead);
+    let emailNotification = "skipped";
+
+    try {
+      emailNotification = await sendLeadEmailNotification(lead, delivery);
+    } catch (emailError) {
+      console.error("Lead email notification failed", emailError);
+      emailNotification = "failed";
+    }
 
     return jsonResponse({
       ok: true,
-      destination,
+      destination: delivery.destination,
+      emailNotification,
+      warning: delivery.warning,
     });
   } catch (error) {
     console.error("Lead submission failed", error);
