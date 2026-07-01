@@ -47,6 +47,49 @@ export type LeadUpdateInput = {
   notes?: string;
 };
 
+export type SiteContentRecord = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  section: string;
+  label: string;
+  content_type: "text" | "textarea" | "url" | "json";
+  value: string;
+  description: string | null;
+};
+
+export type ReservationStatus =
+  | "scheduled"
+  | "confirmed"
+  | "completed"
+  | "cancelled"
+  | "no_show";
+
+export type ReservationRecord = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  lead_id: string | null;
+  patient_name: string;
+  phone: string;
+  treatment: string;
+  starts_at: string;
+  ends_at: string | null;
+  status: ReservationStatus;
+  notes: string | null;
+};
+
+export type ReservationInput = {
+  leadId?: string;
+  patientName: string;
+  phone: string;
+  treatment: string;
+  startsAt: string;
+  endsAt?: string;
+  status?: ReservationStatus;
+  notes?: string;
+};
+
 export const leadStatusLabels: Record<LeadStatus, string> = {
   new: "Nuevo",
   contacted: "Contactado",
@@ -54,6 +97,14 @@ export const leadStatusLabels: Record<LeadStatus, string> = {
   no_response: "No responde",
   discarded: "Descartado",
   archived: "Archivado",
+};
+
+export const reservationStatusLabels: Record<ReservationStatus, string> = {
+  scheduled: "Agendada",
+  confirmed: "Confirmada",
+  completed: "Completada",
+  cancelled: "Cancelada",
+  no_show: "No asistió",
 };
 
 function getSupabaseConfig() {
@@ -182,6 +233,82 @@ export async function updateAdminLead(id: string, input: LeadUpdateInput) {
 
   return supabaseRequest<LeadRecord[]>(
     `leads?id=eq.${encodeURIComponent(id)}&select=*`,
+    {
+      method: "PATCH",
+      headers: {
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(payload),
+    },
+  );
+}
+
+export async function fetchSiteContent() {
+  return supabaseRequest<SiteContentRecord[]>(
+    "site_content?select=*&order=section.asc,label.asc",
+  );
+}
+
+export async function updateSiteContent(
+  id: string,
+  input: Pick<SiteContentRecord, "value">,
+) {
+  return supabaseRequest<SiteContentRecord[]>(
+    `site_content?id=eq.${encodeURIComponent(id)}&select=*`,
+    {
+      method: "PATCH",
+      headers: {
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify({
+        value: input.value,
+      }),
+    },
+  );
+}
+
+export async function fetchReservations() {
+  return supabaseRequest<ReservationRecord[]>(
+    "reservations?select=*&order=starts_at.asc&limit=1000",
+  );
+}
+
+export async function createReservation(input: ReservationInput) {
+  return supabaseRequest<ReservationRecord[]>("reservations?select=*", {
+    method: "POST",
+    headers: {
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify({
+      lead_id: input.leadId || null,
+      patient_name: input.patientName,
+      phone: input.phone,
+      treatment: input.treatment,
+      starts_at: input.startsAt,
+      ends_at: input.endsAt || null,
+      status: input.status || "scheduled",
+      notes: input.notes || null,
+    }),
+  });
+}
+
+export async function updateReservation(
+  id: string,
+  input: Partial<ReservationInput>,
+) {
+  const payload: Record<string, string | null> = {};
+
+  if (typeof input.leadId === "string") payload.lead_id = input.leadId || null;
+  if (typeof input.patientName === "string") payload.patient_name = input.patientName;
+  if (typeof input.phone === "string") payload.phone = input.phone;
+  if (typeof input.treatment === "string") payload.treatment = input.treatment;
+  if (typeof input.startsAt === "string") payload.starts_at = input.startsAt;
+  if (typeof input.endsAt === "string") payload.ends_at = input.endsAt || null;
+  if (typeof input.status === "string") payload.status = input.status;
+  if (typeof input.notes === "string") payload.notes = input.notes || null;
+
+  return supabaseRequest<ReservationRecord[]>(
+    `reservations?id=eq.${encodeURIComponent(id)}&select=*`,
     {
       method: "PATCH",
       headers: {

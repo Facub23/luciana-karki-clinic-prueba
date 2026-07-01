@@ -15,6 +15,7 @@ import {
   LeadStatus,
   leadStatusLabels,
 } from "@/lib/supabase-leads";
+import AdminNav from "@/components/AdminNav";
 
 type AdminLeadDetailProps = {
   initialLead: LeadRecord;
@@ -212,6 +213,7 @@ export default function AdminLeadDetail({
               {lead.name}
             </h1>
             <p className="mt-1 text-sm text-gray-600">{lead.treatment}</p>
+            <AdminNav />
           </div>
 
           <a

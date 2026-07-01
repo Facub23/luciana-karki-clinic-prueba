@@ -18,6 +18,7 @@ import {
   LeadStatus,
   leadStatusLabels,
 } from "@/lib/supabase-leads";
+import AdminNav from "@/components/AdminNav";
 
 type AdminLeadsDashboardProps = {
   initialLeads: LeadRecord[];
@@ -213,6 +214,7 @@ export default function AdminLeadsDashboard({
             <h1 className="mt-1 text-2xl font-semibold text-[#5f4d56]">
               Leads y seguimiento
             </h1>
+            <AdminNav />
           </div>
 
           <form action="/api/admin/logout" method="post">
