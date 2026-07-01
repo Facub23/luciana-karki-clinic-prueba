@@ -69,8 +69,8 @@ export default function LeadForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className={`bg-white border border-pink-100 shadow-lg ${
-        compact ? "rounded-3xl p-4 sm:p-5" : "rounded-[32px] p-8"
+      className={`border border-[#ead1d9] bg-white/95 shadow-[0_22px_60px_rgba(107,91,99,0.16)] ring-1 ring-white/70 backdrop-blur ${
+        compact ? "rounded-[28px] p-4 sm:p-5" : "rounded-[32px] p-8"
       }`}
     >
       <div>
@@ -105,7 +105,7 @@ export default function LeadForm({
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            className={`w-full border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
+            className={`w-full border border-[#ebd8df] bg-[#fffafb] px-4 text-[#4f4149] shadow-inner outline-none transition placeholder:text-[#9d828d] focus:border-[#c98fa1] focus:bg-white focus:ring-4 focus:ring-[#efd8df] ${
               compact
                 ? "rounded-xl py-2.5 text-sm"
                 : "mt-2 rounded-2xl py-3"
@@ -123,7 +123,7 @@ export default function LeadForm({
           <input
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
-            className={`w-full border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
+            className={`w-full border border-[#ebd8df] bg-[#fffafb] px-4 text-[#4f4149] shadow-inner outline-none transition placeholder:text-[#9d828d] focus:border-[#c98fa1] focus:bg-white focus:ring-4 focus:ring-[#efd8df] ${
               compact
                 ? "rounded-xl py-2.5 text-sm"
                 : "mt-2 rounded-2xl py-3"
@@ -141,7 +141,7 @@ export default function LeadForm({
           <input
             value={interest}
             onChange={(event) => setInterest(event.target.value)}
-            className={`w-full border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
+            className={`w-full border border-[#ebd8df] bg-[#fffafb] px-4 text-[#4f4149] shadow-inner outline-none transition placeholder:text-[#9d828d] focus:border-[#c98fa1] focus:bg-white focus:ring-4 focus:ring-[#efd8df] ${
               compact
                 ? "rounded-xl py-2.5 text-sm"
                 : "mt-2 rounded-2xl py-3"
@@ -155,7 +155,7 @@ export default function LeadForm({
       <button
         type="submit"
         disabled={isSubmitting}
-        className={`flex w-full items-center justify-center gap-2 rounded-full bg-[#d9a8b5] px-6 font-medium text-white transition hover:opacity-90 disabled:cursor-wait disabled:opacity-70 ${
+        className={`flex w-full items-center justify-center gap-2 rounded-full bg-[#c98fa1] px-6 font-medium text-white shadow-[0_14px_30px_rgba(201,143,161,0.35)] transition hover:-translate-y-0.5 hover:bg-[#bd7f93] disabled:translate-y-0 disabled:cursor-wait disabled:opacity-70 ${
           compact ? "mt-3 py-3 text-sm" : "mt-6 py-4"
         }`}
       >
