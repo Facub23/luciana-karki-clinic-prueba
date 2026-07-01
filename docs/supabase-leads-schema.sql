@@ -65,3 +65,26 @@ on public.leads
 for all
 using (false)
 with check (false);
+
+create table if not exists public.lead_events (
+  id uuid primary key default gen_random_uuid(),
+  lead_id uuid not null references public.leads(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  event_type text not null,
+  title text not null,
+  description text,
+  metadata jsonb
+);
+
+create index if not exists lead_events_lead_id_idx on public.lead_events (lead_id);
+create index if not exists lead_events_created_at_idx on public.lead_events (created_at desc);
+
+alter table public.lead_events enable row level security;
+
+drop policy if exists "No public lead event access" on public.lead_events;
+
+create policy "No public lead event access"
+on public.lead_events
+for all
+using (false)
+with check (false);

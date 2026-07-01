@@ -32,6 +32,16 @@ export type LeadRecord = {
   archived_at: string | null;
 };
 
+export type LeadEvent = {
+  id: string;
+  lead_id: string;
+  created_at: string;
+  event_type: string;
+  title: string;
+  description: string | null;
+  metadata: Record<string, unknown> | null;
+};
+
 export type LeadUpdateInput = {
   status?: LeadStatus;
   notes?: string;
@@ -86,6 +96,45 @@ export async function fetchAdminLeads() {
   return supabaseRequest<LeadRecord[]>(
     "leads?select=*&order=created_at.desc&limit=500",
   );
+}
+
+export async function fetchAdminLeadEvents() {
+  try {
+    return await supabaseRequest<LeadEvent[]>(
+      "lead_events?select=*&order=created_at.desc&limit=1000",
+    );
+  } catch (error) {
+    console.error("Supabase lead events fetch failed", error);
+    return [];
+  }
+}
+
+export async function createLeadEvent(
+  leadId: string,
+  event: {
+    eventType: string;
+    title: string;
+    description?: string;
+    metadata?: Record<string, unknown>;
+  },
+) {
+  try {
+    await supabaseRequest<null>("lead_events", {
+      method: "POST",
+      headers: {
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        lead_id: leadId,
+        event_type: event.eventType,
+        title: event.title,
+        description: event.description ?? null,
+        metadata: event.metadata ?? null,
+      }),
+    });
+  } catch (error) {
+    console.error("Supabase lead event insert failed", error);
+  }
 }
 
 export async function updateAdminLead(id: string, input: LeadUpdateInput) {

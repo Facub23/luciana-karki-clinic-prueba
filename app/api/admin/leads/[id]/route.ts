@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { updateAdminLead } from "@/lib/supabase-leads";
+import {
+  createLeadEvent,
+  leadStatusLabels,
+  updateAdminLead,
+} from "@/lib/supabase-leads";
 
 const updateLeadSchema = z.object({
   status: z
@@ -39,6 +43,24 @@ export async function PATCH(
   }
 
   const [lead] = await updateAdminLead(id, parsedBody.data);
+
+  if (parsedBody.data.status) {
+    await createLeadEvent(id, {
+      eventType: "status_changed",
+      title: `Estado actualizado a ${leadStatusLabels[parsedBody.data.status]}`,
+      metadata: {
+        status: parsedBody.data.status,
+      },
+    });
+  }
+
+  if (typeof parsedBody.data.notes === "string") {
+    await createLeadEvent(id, {
+      eventType: "note_updated",
+      title: "Notas internas actualizadas",
+      description: parsedBody.data.notes,
+    });
+  }
 
   return Response.json({
     ok: true,
