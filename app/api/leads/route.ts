@@ -40,7 +40,10 @@ type Lead = Omit<LeadInput, "website"> & {
   ip: string;
 };
 
+type DatabaseStatus = "supabase" | "supabase_skipped" | "supabase_failed";
+
 type DeliveryResult = {
+  database: DatabaseStatus;
   destination: "webhook" | "local" | "webhook_failed";
   warning?: string;
 };
@@ -88,7 +91,8 @@ function formatLeadForEmail(lead: Lead, delivery: DeliveryResult) {
     `UTM source: ${lead.utmSource || "-"}`,
     `UTM medium: ${lead.utmMedium || "-"}`,
     `UTM campaign: ${lead.utmCampaign || "-"}`,
-    `Destino backend: ${delivery.destination}`,
+    `Base de datos: ${delivery.database}`,
+    `Google Sheets: ${delivery.destination}`,
     delivery.warning ? `Aviso: ${delivery.warning}` : "",
     "",
     "Mensaje preparado:",
@@ -123,7 +127,8 @@ function formatLeadHtmlForEmail(lead: Lead, delivery: DeliveryResult) {
     ["UTM source", lead.utmSource || "-"],
     ["UTM medium", lead.utmMedium || "-"],
     ["UTM campaign", lead.utmCampaign || "-"],
-    ["Destino backend", delivery.destination],
+    ["Base de datos", delivery.database],
+    ["Google Sheets", delivery.destination],
     ["Aviso", delivery.warning || "-"],
     ["ID", lead.id],
     ["Fecha", lead.createdAt],
@@ -151,6 +156,29 @@ function formatLeadHtmlForEmail(lead: Lead, delivery: DeliveryResult) {
   `;
 }
 
+function toSupabaseLead(lead: Lead) {
+  return {
+    id: lead.id,
+    created_at: lead.createdAt,
+    name: lead.name,
+    phone: lead.phone,
+    treatment: lead.treatment,
+    page: lead.page,
+    landing_page: lead.landingPage,
+    referrer: lead.referrer,
+    message: lead.message,
+    source: lead.source,
+    utm_source: lead.utmSource,
+    utm_medium: lead.utmMedium,
+    utm_campaign: lead.utmCampaign,
+    utm_term: lead.utmTerm,
+    utm_content: lead.utmContent,
+    ip: lead.ip,
+    user_agent: lead.userAgent,
+    status: "new",
+  };
+}
+
 async function appendLeadLocally(lead: Lead) {
   const dataDir = path.join(process.cwd(), "data");
   const filePath = path.join(dataDir, "leads.json");
@@ -168,6 +196,40 @@ async function appendLeadLocally(lead: Lead) {
 
   leads.push(lead);
   await writeFile(filePath, `${JSON.stringify(leads, null, 2)}\n`, "utf8");
+}
+
+async function saveLeadToSupabase(lead: Lead): Promise<DatabaseStatus> {
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    return "supabase_skipped";
+  }
+
+  try {
+    const response = await fetch(`${supabaseUrl}/rest/v1/leads`, {
+      method: "POST",
+      headers: {
+        apikey: serviceRoleKey,
+        Authorization: `Bearer ${serviceRoleKey}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(toSupabaseLead(lead)),
+    });
+
+    if (!response.ok) {
+      const responseText = await response.text();
+      throw new Error(
+        `Supabase failed with status ${response.status}: ${responseText}`,
+      );
+    }
+
+    return "supabase";
+  } catch (error) {
+    console.error("Supabase lead insert failed", error);
+    return "supabase_failed";
+  }
 }
 
 async function sendLeadToWebhook(lead: Lead) {
@@ -205,10 +267,18 @@ async function sendLeadToWebhook(lead: Lead) {
   return "webhook" as const;
 }
 
-async function deliverLead(lead: Lead): Promise<DeliveryResult> {
+async function deliverLead(
+  lead: Lead,
+  database: DatabaseStatus,
+): Promise<DeliveryResult> {
   try {
     const destination = await sendLeadToWebhook(lead);
-    return { destination };
+    const warning =
+      database === "supabase_failed"
+        ? "Supabase no confirmó el guardado. Sheets y email siguen funcionando."
+        : undefined;
+
+    return { database, destination, warning };
   } catch (error) {
     console.error("Lead webhook delivery failed", error);
 
@@ -219,6 +289,7 @@ async function deliverLead(lead: Lead): Promise<DeliveryResult> {
     }
 
     return {
+      database,
       destination: "webhook_failed",
       warning:
         "Google Sheets no confirmó el guardado. El usuario igualmente continuará por WhatsApp.",
@@ -333,7 +404,8 @@ export async function POST(request: Request) {
       ip,
     };
 
-    const delivery = await deliverLead(lead);
+    const database = await saveLeadToSupabase(lead);
+    const delivery = await deliverLead(lead, database);
     let emailNotification = "skipped";
 
     try {
@@ -345,6 +417,7 @@ export async function POST(request: Request) {
 
     return jsonResponse({
       ok: true,
+      database,
       destination: delivery.destination,
       emailNotification,
       warning: delivery.warning,
