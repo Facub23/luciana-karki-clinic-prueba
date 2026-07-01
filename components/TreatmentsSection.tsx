@@ -1,70 +1,63 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { treatmentCategories, getTreatmentsByCategory } from "@/lib/treatments";
+import { treatments } from "@/lib/treatments";
 
 export default function TreatmentsSection() {
   return (
-    <section id="tratamientos" className="max-w-7xl mx-auto px-6 py-20 lg:py-28">
+    <section id="tratamientos" className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
       <div className="mx-auto mb-14 max-w-3xl text-center">
-        <span className="uppercase tracking-[0.3em] text-[#d9a8b5] text-sm">
+        <span className="text-sm uppercase tracking-[0.3em] text-[#d9a8b5]">
           Tratamientos
         </span>
 
         <h2 className="mt-4 text-4xl font-light text-[#6b5b63] sm:text-5xl">
-          Páginas pensadas para convertir interés en reserva
+          Elige el tratamiento que quieres valorar
         </h2>
 
         <p className="mt-6 text-lg text-gray-600">
-          Cada tratamiento tiene su propia página con beneficios, precio,
-          preguntas frecuentes y acceso directo a WhatsApp.
+          Cada página incluye beneficios, precio, ficha técnica y acceso directo
+          a WhatsApp para coordinar la valoración.
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {treatmentCategories.map((category) => (
-          <div
-            key={category}
-            className="bg-white rounded-[24px] p-6 shadow-md transition hover:shadow-xl sm:p-8"
+      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        {treatments.map((treatment) => (
+          <article
+            key={treatment.slug}
+            className="flex min-h-[330px] flex-col rounded-[26px] border border-[#ead1d9] bg-white p-6 shadow-[0_16px_45px_rgba(107,91,99,0.1)] transition hover:-translate-y-1 hover:shadow-[0_22px_60px_rgba(107,91,99,0.15)]"
           >
-            <h3 className="text-2xl text-[#6b5b63] sm:text-3xl">{category}</h3>
+            <span className="text-xs uppercase tracking-[0.22em] text-[#c98fa1]">
+              {treatment.category}
+            </span>
 
-            <div className="mt-7 space-y-6">
-              {getTreatmentsByCategory(category).map((treatment) => (
-                <div
-                  key={treatment.slug}
-                  className="border-b border-pink-100 pb-6 last:border-b-0 last:pb-0"
-                >
-                  <h4 className="font-medium text-[#6b5b63]">
-                    {treatment.name}
-                  </h4>
+            <h3 className="mt-4 text-2xl font-light text-[#6b5b63]">
+              {treatment.name}
+            </h3>
 
-                  <p className="mt-2 text-sm leading-6 text-gray-600">
-                    {treatment.shortDescription}
-                  </p>
+            <p className="mt-4 flex-1 text-sm leading-6 text-gray-600">
+              {treatment.shortDescription}
+            </p>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-3">
-                    {treatment.oldPrice ? (
-                      <span className="text-gray-400 line-through">
-                        {treatment.oldPrice}
-                      </span>
-                    ) : null}
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              {treatment.oldPrice ? (
+                <span className="text-gray-400 line-through">
+                  {treatment.oldPrice}
+                </span>
+              ) : null}
 
-                    <span className="text-xl font-semibold text-[#d9a8b5]">
-                      {treatment.price}
-                    </span>
-                  </div>
-
-                  <Link
-                    href={`/tratamientos/${treatment.slug}`}
-                    className="mt-4 inline-flex items-center gap-2 rounded-full border border-[#d9a8b5] px-5 py-2 text-sm font-medium text-[#d9a8b5] transition hover:bg-[#d9a8b5] hover:text-white"
-                  >
-                    Ver tratamiento
-                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                  </Link>
-                </div>
-              ))}
+              <span className="text-xl font-semibold text-[#c98fa1]">
+                {treatment.price}
+              </span>
             </div>
-          </div>
+
+            <Link
+              href={`/tratamientos/${treatment.slug}`}
+              className="mt-6 inline-flex items-center justify-center gap-2 rounded-full border border-[#d9a8b5] px-5 py-2.5 text-sm font-medium text-[#b9788d] transition hover:bg-[#c98fa1] hover:text-white"
+            >
+              Ver tratamiento
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </article>
         ))}
       </div>
     </section>

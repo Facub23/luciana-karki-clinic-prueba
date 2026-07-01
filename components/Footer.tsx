@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { treatments } from "@/lib/treatments";
 
@@ -13,7 +14,19 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-6 py-16">
         <div className="grid gap-10 lg:grid-cols-[1.05fr_2fr]">
           <div>
-            <h3 className="text-xl font-semibold">
+            <div className="flex items-center gap-4">
+              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/95 shadow-sm">
+                <Image
+                  src="/logo.png"
+                  alt="Logo Dra. Luciana Karki"
+                  width={52}
+                  height={52}
+                  className="h-12 w-12 object-contain"
+                />
+              </span>
+            </div>
+
+            <h3 className="mt-5 text-xl font-semibold">
               Dra. Luciana Karki Martín
             </h3>
 

@@ -31,6 +31,42 @@ type TreatmentPageProps = {
   }>;
 };
 
+type TreatmentDetails = NonNullable<(typeof treatments)[number]["details"]>;
+
+function getPageDetails(treatment: (typeof treatments)[number]): TreatmentDetails {
+  if (treatment.details) {
+    return treatment.details;
+  }
+
+  const isBody = treatment.category.includes("Corporales");
+  const isBiostimulator = treatment.category.includes("Bioestimuladores");
+
+  return {
+    duration: isBody ? "45-60 min aprox." : "30-45 min aprox.",
+    technique: isBiostimulator
+      ? "Bioestimulación médica con protocolo personalizado"
+      : isBody
+        ? "Plan corporal médico-estético adaptado a la zona"
+        : "Técnica inyectable o médico-estética según valoración",
+    comfort:
+      "Molestia mínima. Se trabaja con una pauta pensada para que la experiencia sea tranquila.",
+    recovery:
+      "Habitualmente inmediata, con indicaciones sencillas para las primeras horas.",
+    results: isBiostimulator
+      ? "Progresivos, con mejora gradual de calidad de piel"
+      : "Naturales y adaptados a la anatomía de cada paciente",
+    effectDuration:
+      "Variable según tratamiento, metabolismo, hábitos y cuidados posteriores",
+    sessions: "Se define en consulta según objetivo y respuesta individual",
+    contribution:
+      "Ayuda a mejorar proporción, calidad de piel o armonía de la zona tratada sin buscar cambios artificiales.",
+    care:
+      "Evitar manipular la zona, calor intenso, ejercicio fuerte y exposición solar directa durante las primeras 24-48 h, salvo indicación específica.",
+    precautions:
+      "La indicación se confirma en valoración médica. Se revisan antecedentes, zona a tratar y expectativas antes de realizar cualquier procedimiento.",
+  };
+}
+
 export function generateStaticParams() {
   return treatments.map((treatment) => ({
     slug: treatment.slug,
@@ -92,24 +128,20 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
     notFound();
   }
 
-  const detailItems = treatment.details
-    ? [
-        { label: "Duración", value: treatment.details.duration, icon: Timer },
-        { label: "Técnica", value: treatment.details.technique, icon: Droplets },
-        {
-          label: "Confort",
-          value: treatment.details.comfort,
-          icon: ShieldCheck,
-        },
-        {
-          label: "Recuperación",
-          value: treatment.details.recovery,
-          icon: CheckCircle2,
-        },
-        { label: "Resultados", value: treatment.details.results, icon: Sparkles },
-        { label: "Sesiones", value: treatment.details.sessions, icon: CalendarDays },
-      ]
-    : [];
+  const pageDetails = getPageDetails(treatment);
+  const detailItems = [
+    { label: "Duración", value: pageDetails.duration, icon: Timer },
+    { label: "Técnica", value: pageDetails.technique, icon: Droplets },
+    { label: "Confort", value: pageDetails.comfort, icon: ShieldCheck },
+    { label: "Recuperación", value: pageDetails.recovery, icon: CheckCircle2 },
+    { label: "Resultados", value: pageDetails.results, icon: Sparkles },
+    {
+      label: "Duración del efecto",
+      value: pageDetails.effectDuration,
+      icon: Sparkles,
+    },
+    { label: "Sesiones", value: pageDetails.sessions, icon: CalendarDays },
+  ];
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-[#faf7f8] to-white">
@@ -163,20 +195,19 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
             </p>
           </div>
 
-          {treatment.details ? (
-            <section className="mt-10 overflow-hidden rounded-[34px] border border-[#ead1d9] bg-white shadow-[0_22px_70px_rgba(107,91,99,0.12)]">
+          <section className="mt-10 overflow-hidden rounded-[34px] border border-[#ead1d9] bg-white shadow-[0_22px_70px_rgba(107,91,99,0.12)]">
               <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
                 <div className="bg-[#fffafb] p-8 sm:p-10">
                   <span className="text-xs uppercase tracking-[0.28em] text-[#c98fa1]">
-                    Protocolo corporal
+                    Protocolo personalizado
                   </span>
 
                   <h2 className="mt-4 text-3xl font-light text-[#6b5b63] sm:text-4xl">
-                    Piel más uniforme en zonas delicadas
+                    Un plan diseñado para tu caso
                   </h2>
 
                   <p className="mt-5 leading-8 text-gray-600">
-                    {treatment.details.contribution}
+                    {pageDetails.contribution}
                   </p>
 
                   <div className="mt-8 grid gap-4">
@@ -185,7 +216,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
                         Cuidados posteriores
                       </h3>
                       <p className="mt-3 text-sm leading-6 text-gray-600">
-                        {treatment.details.care}
+                        {pageDetails.care}
                       </p>
                     </div>
 
@@ -194,7 +225,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
                         Precauciones
                       </h3>
                       <p className="mt-3 text-sm leading-6 text-gray-600">
-                        {treatment.details.precautions}
+                        {pageDetails.precautions}
                       </p>
                     </div>
                   </div>
@@ -227,7 +258,6 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
                 </div>
               </div>
             </section>
-          ) : null}
 
           <div className="mt-14 grid gap-8 md:grid-cols-2">
             <div className="rounded-[32px] bg-white p-8 shadow-sm">
