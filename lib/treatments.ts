@@ -8,6 +8,18 @@ export type Treatment = {
   salesDescription: string;
   benefits: string[];
   idealFor: string[];
+  details?: {
+    duration: string;
+    technique: string;
+    comfort: string;
+    recovery: string;
+    results: string;
+    effectDuration: string;
+    sessions: string;
+    contribution: string;
+    care: string;
+    precautions: string;
+  };
   image: string;
 };
 
@@ -76,6 +88,42 @@ export const treatments: Treatment[] = [
       "Sudoración en pies",
     ],
     image: "/images/tratamiento-3.jpeg",
+  },
+  {
+    slug: "peeling-despigmentante-corporal",
+    category: "Tratamientos Corporales",
+    name: "Peeling despigmentante corporal",
+    price: "499€",
+    shortDescription:
+      "Tratamiento médico-estético para mejorar el tono de axilas, entrepierna y zonas íntimas con un enfoque progresivo y cuidadoso.",
+    salesDescription:
+      "El peeling despigmentante corporal se diseña para trabajar zonas delicadas con tendencia a hiperpigmentación, buscando una piel más uniforme, luminosa y suave. La pauta se define siempre tras valoración médica para adaptar activos, frecuencia y cuidados a la sensibilidad de cada zona.",
+    benefits: [
+      "Ayuda a uniformar el tono de la piel",
+      "Mejora progresiva de textura y luminosidad",
+      "Protocolo adaptado a zonas sensibles",
+    ],
+    idealFor: [
+      "Oscurecimiento en axilas",
+      "Entrepierna o zona íntima con tono irregular",
+      "Personas que buscan una alternativa sin láser",
+    ],
+    details: {
+      duration: "40 min aprox.",
+      technique: "Peeling médico despigmentante con activos aclarantes",
+      comfort: "Molestia mínima; se adapta a la sensibilidad de la zona",
+      recovery: "Inmediata, con cuidados locales posteriores",
+      results: "Progresivos, visibles sesión a sesión",
+      effectDuration: "6-12 meses según hábitos y cuidados",
+      sessions: "Plan habitual de 3 sesiones",
+      contribution:
+        "Aporta un tono más uniforme, mejora la suavidad y ayuda a recuperar luminosidad natural en zonas con fricción o pigmentación.",
+      care:
+        "Evitar sol directo, depilación y exfoliación durante las 48 h posteriores. Mantener hidratación y aplicar la pauta indicada en consulta.",
+      precautions:
+        "No se recomienda durante embarazo, lactancia o si existen lesiones activas en la zona. La indicación se confirma siempre en valoración médica.",
+    },
+    image: "/images/tratamiento-4.png",
   },
   {
     slug: "labios-acido-hialuronico",

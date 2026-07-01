@@ -1,6 +1,13 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { CheckCircle2 } from "lucide-react";
+import {
+  CalendarDays,
+  CheckCircle2,
+  Droplets,
+  ShieldCheck,
+  Sparkles,
+  Timer,
+} from "lucide-react";
 import { notFound } from "next/navigation";
 import BookingProcess from "@/components/BookingProcess";
 import FaqSection from "@/components/FaqSection";
@@ -85,6 +92,25 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
     notFound();
   }
 
+  const detailItems = treatment.details
+    ? [
+        { label: "Duración", value: treatment.details.duration, icon: Timer },
+        { label: "Técnica", value: treatment.details.technique, icon: Droplets },
+        {
+          label: "Confort",
+          value: treatment.details.comfort,
+          icon: ShieldCheck,
+        },
+        {
+          label: "Recuperación",
+          value: treatment.details.recovery,
+          icon: CheckCircle2,
+        },
+        { label: "Resultados", value: treatment.details.results, icon: Sparkles },
+        { label: "Sesiones", value: treatment.details.sessions, icon: CalendarDays },
+      ]
+    : [];
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-[#faf7f8] to-white">
       <JsonLd data={treatmentJsonLd(treatment)} />
@@ -136,6 +162,72 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
               realista y adaptada a tu caso.
             </p>
           </div>
+
+          {treatment.details ? (
+            <section className="mt-10 overflow-hidden rounded-[34px] border border-[#ead1d9] bg-white shadow-[0_22px_70px_rgba(107,91,99,0.12)]">
+              <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
+                <div className="bg-[#fffafb] p-8 sm:p-10">
+                  <span className="text-xs uppercase tracking-[0.28em] text-[#c98fa1]">
+                    Protocolo corporal
+                  </span>
+
+                  <h2 className="mt-4 text-3xl font-light text-[#6b5b63] sm:text-4xl">
+                    Piel más uniforme en zonas delicadas
+                  </h2>
+
+                  <p className="mt-5 leading-8 text-gray-600">
+                    {treatment.details.contribution}
+                  </p>
+
+                  <div className="mt-8 grid gap-4">
+                    <div className="rounded-2xl border border-[#ead1d9] bg-white p-5">
+                      <h3 className="font-medium text-[#6b5b63]">
+                        Cuidados posteriores
+                      </h3>
+                      <p className="mt-3 text-sm leading-6 text-gray-600">
+                        {treatment.details.care}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-[#ead1d9] bg-white p-5">
+                      <h3 className="font-medium text-[#6b5b63]">
+                        Precauciones
+                      </h3>
+                      <p className="mt-3 text-sm leading-6 text-gray-600">
+                        {treatment.details.precautions}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6 sm:p-8">
+                  <div className="grid gap-4">
+                    {detailItems.map((item) => {
+                      const Icon = item.icon;
+
+                      return (
+                        <div
+                          key={item.label}
+                          className="flex gap-4 rounded-2xl border border-[#ead1d9] bg-[#fffafb] p-4"
+                        >
+                          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#c98fa1] text-white">
+                            <Icon className="h-5 w-5" aria-hidden="true" />
+                          </span>
+
+                          <p className="leading-7 text-gray-600">
+                            <span className="font-semibold text-[#6b5b63]">
+                              {item.label}:
+                            </span>{" "}
+                            {item.value}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </section>
+          ) : null}
 
           <div className="mt-14 grid gap-8 md:grid-cols-2">
             <div className="rounded-[32px] bg-white p-8 shadow-sm">
