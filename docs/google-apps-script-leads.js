@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-const SHEET_NAME = "Leads";
+var SHEET_NAME = "Leads";
 
-const HEADERS = [
+var HEADERS = [
   "Fecha",
   "Nombre",
   "Telefono",
@@ -19,26 +19,26 @@ const HEADERS = [
   "UTM content",
   "IP",
   "User Agent",
-  "ID",
+  "ID"
 ];
 
 function doPost(e) {
   try {
-    const sheet = getOrCreateSheet();
+    var sheet = getOrCreateSheet();
     ensureHeaders(sheet);
 
-    const payload = JSON.parse(e.postData.contents || "{}");
-    const row = buildRow(payload);
+    var payload = JSON.parse(e.postData.contents || "{}");
+    var row = buildRow(payload);
 
     sheet.appendRow(row);
 
     return jsonResponse({
-      ok: true,
+      ok: true
     });
   } catch (error) {
     return jsonResponse({
       ok: false,
-      error: String(error),
+      error: String(error)
     });
   }
 }
@@ -61,13 +61,13 @@ function buildRow(payload) {
     payload.utmContent || "",
     payload.ip || "",
     payload.userAgent || "",
-    payload.id || "",
+    payload.id || ""
   ];
 }
 
 function getOrCreateSheet() {
-  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spreadsheet.getSheetByName(SHEET_NAME);
 
   if (!sheet) {
     sheet = spreadsheet.insertSheet(SHEET_NAME);
@@ -83,14 +83,15 @@ function ensureHeaders(sheet) {
     return;
   }
 
-  const currentHeaders = sheet
-    .getRange(1, 1, 1, Math.max(sheet.getLastColumn(), 1))
-    .getValues()[0]
-    .map(String);
+  var lastColumn = Math.max(sheet.getLastColumn(), 1);
+  var currentHeaders = sheet.getRange(1, 1, 1, lastColumn).getValues()[0];
+  var missingHeaders = [];
 
-  const missingHeaders = HEADERS.filter(
-    (header) => !currentHeaders.includes(header),
-  );
+  for (var i = 0; i < HEADERS.length; i++) {
+    if (currentHeaders.indexOf(HEADERS[i]) === -1) {
+      missingHeaders.push(HEADERS[i]);
+    }
+  }
 
   if (missingHeaders.length === 0) {
     freezeAndStyleHeaders(sheet);
@@ -107,7 +108,7 @@ function ensureHeaders(sheet) {
 function freezeAndStyleHeaders(sheet) {
   sheet.setFrozenRows(1);
 
-  const headerRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
+  var headerRange = sheet.getRange(1, 1, 1, sheet.getLastColumn());
   headerRange.setFontWeight("bold");
   headerRange.setBackground("#f7dfe7");
 
@@ -116,6 +117,6 @@ function freezeAndStyleHeaders(sheet) {
 
 function jsonResponse(body) {
   return ContentService.createTextOutput(JSON.stringify(body)).setMimeType(
-    ContentService.MimeType.JSON,
+    ContentService.MimeType.JSON
   );
 }
