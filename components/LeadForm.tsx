@@ -70,7 +70,7 @@ export default function LeadForm({
     <form
       onSubmit={handleSubmit}
       className={`bg-white border border-pink-100 shadow-lg ${
-        compact ? "rounded-3xl p-5 sm:p-6" : "rounded-[32px] p-8"
+        compact ? "rounded-3xl p-4 sm:p-5" : "rounded-[32px] p-8"
       }`}
     >
       <div>
@@ -79,14 +79,14 @@ export default function LeadForm({
         </span>
         <h3
           className={`font-light text-[#6b5b63] ${
-            compact ? "mt-2 text-xl sm:text-2xl" : "mt-3 text-2xl"
+            compact ? "mt-1 text-xl" : "mt-3 text-2xl"
           }`}
         >
           Reserva tu consulta
         </h3>
         <p
           className={`text-sm leading-6 text-gray-600 ${
-            compact ? "mt-2" : "mt-3"
+            compact ? "mt-1 hidden sm:block" : "mt-3"
           }`}
         >
           Completa tus datos y abre WhatsApp con el mensaje listo para reservar.
@@ -95,16 +95,20 @@ export default function LeadForm({
 
       <div
         className={`grid gap-3 ${
-          compact ? "mt-4 sm:grid-cols-2" : "mt-6"
+          compact ? "mt-3 sm:grid-cols-2" : "mt-6"
         }`}
       >
         <label className="block">
-          <span className="text-sm text-[#6b5b63]">Nombre</span>
+          <span className={compact ? "sr-only" : "text-sm text-[#6b5b63]"}>
+            Nombre
+          </span>
           <input
             value={name}
             onChange={(event) => setName(event.target.value)}
-            className={`mt-2 w-full rounded-2xl border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
-              compact ? "py-2.5" : "py-3"
+            className={`w-full border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
+              compact
+                ? "rounded-xl py-2.5 text-sm"
+                : "mt-2 rounded-2xl py-3"
             }`}
             placeholder="Tu nombre"
             type="text"
@@ -113,12 +117,16 @@ export default function LeadForm({
         </label>
 
         <label className="block">
-          <span className="text-sm text-[#6b5b63]">Teléfono</span>
+          <span className={compact ? "sr-only" : "text-sm text-[#6b5b63]"}>
+            Teléfono
+          </span>
           <input
             value={phone}
             onChange={(event) => setPhone(event.target.value)}
-            className={`mt-2 w-full rounded-2xl border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
-              compact ? "py-2.5" : "py-3"
+            className={`w-full border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
+              compact
+                ? "rounded-xl py-2.5 text-sm"
+                : "mt-2 rounded-2xl py-3"
             }`}
             placeholder="+34..."
             type="tel"
@@ -127,12 +135,16 @@ export default function LeadForm({
         </label>
 
         <label className={compact ? "block sm:col-span-2" : "block"}>
-          <span className="text-sm text-[#6b5b63]">Tratamiento</span>
+          <span className={compact ? "sr-only" : "text-sm text-[#6b5b63]"}>
+            Tratamiento
+          </span>
           <input
             value={interest}
             onChange={(event) => setInterest(event.target.value)}
-            className={`mt-2 w-full rounded-2xl border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
-              compact ? "py-2.5" : "py-3"
+            className={`w-full border border-pink-100 px-4 outline-none focus:border-[#d9a8b5] ${
+              compact
+                ? "rounded-xl py-2.5 text-sm"
+                : "mt-2 rounded-2xl py-3"
             }`}
             placeholder="Tratamiento que te interesa"
             type="text"
@@ -144,7 +156,7 @@ export default function LeadForm({
         type="submit"
         disabled={isSubmitting}
         className={`flex w-full items-center justify-center gap-2 rounded-full bg-[#d9a8b5] px-6 font-medium text-white transition hover:opacity-90 disabled:cursor-wait disabled:opacity-70 ${
-          compact ? "mt-4 py-3.5" : "mt-6 py-4"
+          compact ? "mt-3 py-3 text-sm" : "mt-6 py-4"
         }`}
       >
         {isSubmitting ? (
