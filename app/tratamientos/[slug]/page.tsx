@@ -1,13 +1,21 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { CheckCircle2 } from "lucide-react";
 import { notFound } from "next/navigation";
 import BookingProcess from "@/components/BookingProcess";
 import FaqSection from "@/components/FaqSection";
 import Footer from "@/components/Footer";
+import JsonLd from "@/components/JsonLd";
 import LeadForm from "@/components/LeadForm";
 import Navbar from "@/components/Navbar";
 import TrustSignals from "@/components/TrustSignals";
 import WhatsappButton from "@/components/WhatsappButton";
+import {
+  absoluteUrl,
+  clinicName,
+  treatmentJsonLd,
+  treatmentKeywords,
+} from "@/lib/seo";
 import { getTreatmentBySlug, treatments } from "@/lib/treatments";
 
 type TreatmentPageProps = {
@@ -22,7 +30,9 @@ export function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params }: TreatmentPageProps) {
+export async function generateMetadata({
+  params,
+}: TreatmentPageProps): Promise<Metadata> {
   const { slug } = await params;
   const treatment = getTreatmentBySlug(slug);
 
@@ -30,9 +40,40 @@ export async function generateMetadata({ params }: TreatmentPageProps) {
     return {};
   }
 
+  const url = absoluteUrl(`/tratamientos/${treatment.slug}`);
+
   return {
-    title: `${treatment.name} | Dra. Luciana Karki Martín`,
+    title: treatment.name,
     description: treatment.shortDescription,
+    keywords: treatmentKeywords(treatment.name),
+    alternates: {
+      canonical: url,
+    },
+    openGraph: {
+      type: "article",
+      locale: "es_ES",
+      url,
+      title: `${treatment.name} | ${clinicName}`,
+      description: treatment.shortDescription,
+      images: [
+        {
+          url: absoluteUrl(treatment.image),
+          width: 1200,
+          height: 1200,
+          alt: treatment.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${treatment.name} | ${clinicName}`,
+      description: treatment.shortDescription,
+      images: [absoluteUrl(treatment.image)],
+    },
+    robots: {
+      index: true,
+      follow: true,
+    },
   };
 }
 
@@ -46,6 +87,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-[#faf7f8] to-white">
+      <JsonLd data={treatmentJsonLd(treatment)} />
       <Navbar />
 
       <section className="max-w-7xl mx-auto grid gap-12 px-6 py-20 lg:grid-cols-[1fr_420px] lg:items-start">
@@ -61,7 +103,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
             {treatment.category}
           </span>
 
-          <h1 className="mt-5 text-5xl font-light text-[#6b5b63] lg:text-7xl">
+          <h1 className="mt-5 text-4xl font-light text-[#6b5b63] sm:text-5xl lg:text-7xl">
             {treatment.name}
           </h1>
 
@@ -98,18 +140,18 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
           <div className="mt-14 grid gap-8 md:grid-cols-2">
             <div className="rounded-[32px] bg-white p-8 shadow-sm">
               <h2 className="text-2xl text-[#6b5b63]">Beneficios</h2>
-              <ul className="mt-5 space-y-3 text-gray-600">
+              <ul className="mt-5 list-disc space-y-3 pl-5 text-gray-600">
                 {treatment.benefits.map((benefit) => (
-                  <li key={benefit}>• {benefit}</li>
+                  <li key={benefit}>{benefit}</li>
                 ))}
               </ul>
             </div>
 
             <div className="rounded-[32px] bg-white p-8 shadow-sm">
               <h2 className="text-2xl text-[#6b5b63]">Ideal para</h2>
-              <ul className="mt-5 space-y-3 text-gray-600">
+              <ul className="mt-5 list-disc space-y-3 pl-5 text-gray-600">
                 {treatment.idealFor.map((item) => (
-                  <li key={item}>• {item}</li>
+                  <li key={item}>{item}</li>
                 ))}
               </ul>
             </div>

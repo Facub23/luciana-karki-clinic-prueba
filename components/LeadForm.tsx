@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { MessageCircle } from "lucide-react";
+import { Loader2, MessageCircle } from "lucide-react";
 
 type LeadFormProps = {
   treatmentName?: string;
@@ -17,6 +17,8 @@ export default function LeadForm({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [interest, setInterest] = useState(treatmentName ?? "");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
 
   const message = useMemo(() => {
     const selectedTreatment = interest || treatmentName || "una valoración";
@@ -30,8 +32,33 @@ export default function LeadForm({
       .join("\n");
   }, [interest, name, phone, treatmentName]);
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setIsSubmitting(true);
+    setStatus("idle");
+
+    try {
+      const response = await fetch("/api/leads", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          phone,
+          treatment: interest || treatmentName || "Valoración",
+          page: window.location.pathname,
+          message,
+        }),
+      });
+
+      setStatus(response.ok ? "saved" : "error");
+    } catch {
+      setStatus("error");
+    } finally {
+      setIsSubmitting(false);
+    }
+
     window.open(
       `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
       "_blank",
@@ -97,11 +124,28 @@ export default function LeadForm({
 
       <button
         type="submit"
-        className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#d9a8b5] px-6 py-4 font-medium text-white transition hover:opacity-90"
+        disabled={isSubmitting}
+        className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#d9a8b5] px-6 py-4 font-medium text-white transition hover:opacity-90 disabled:cursor-wait disabled:opacity-70"
       >
-        <MessageCircle className="h-5 w-5" aria-hidden="true" />
-        Enviar por WhatsApp
+        {isSubmitting ? (
+          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+        ) : (
+          <MessageCircle className="h-5 w-5" aria-hidden="true" />
+        )}
+        {isSubmitting ? "Guardando..." : "Enviar por WhatsApp"}
       </button>
+
+      {status === "saved" ? (
+        <p className="mt-3 text-sm text-green-700">
+          Solicitud registrada. Se abrirá WhatsApp para continuar.
+        </p>
+      ) : null}
+
+      {status === "error" ? (
+        <p className="mt-3 text-sm text-amber-700">
+          WhatsApp se abrirá igual. Revisaremos la conexión del registro luego.
+        </p>
+      ) : null}
     </form>
   );
 }
