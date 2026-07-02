@@ -98,6 +98,31 @@ export default function AdminReservationsCalendar({
   const selectedReservations = filteredReservations
     .filter((reservation) => sameDay(new Date(reservation.starts_at), selectedDate))
     .sort(sortReservations);
+  const reservationMetrics = useMemo(() => {
+    return reservations.reduce(
+      (acc, reservation) => {
+        const startsAt = new Date(reservation.starts_at).getTime();
+        const isClosed = ["completed", "cancelled", "no_show"].includes(
+          reservation.status,
+        );
+
+        if (startsAt >= filterNow && !isClosed) {
+          acc.pending += 1;
+        }
+
+        if (reservation.status === "scheduled" || reservation.status === "confirmed") {
+          acc.scheduled += 1;
+        }
+
+        if (reservation.status === "completed" || startsAt < filterNow) {
+          acc.finished += 1;
+        }
+
+        return acc;
+      },
+      { pending: 0, scheduled: 0, finished: 0 },
+    );
+  }, [filterNow, reservations]);
 
   function previousMonth() {
     setCurrentMonth(
@@ -337,38 +362,35 @@ export default function AdminReservationsCalendar({
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <div className="rounded-lg border border-[#ead1d9] bg-[#fffafb] px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a7583]">
-                Mes
+                Pendientes
               </p>
               <p className="mt-1 text-2xl font-semibold text-[#5f4d56]">
-                {
-                  filteredReservations.filter(
-                    (reservation) =>
-                      new Date(reservation.starts_at).getMonth() ===
-                        currentMonth.getMonth() &&
-                      new Date(reservation.starts_at).getFullYear() ===
-                        currentMonth.getFullYear(),
-                  ).length
-                }
+                {reservationMetrics.pending}
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                Proximas sin cerrar
               </p>
             </div>
             <div className="rounded-lg border border-[#ead1d9] bg-[#fffafb] px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a7583]">
-                Dia elegido
+                Agendadas
               </p>
               <p className="mt-1 text-2xl font-semibold text-[#5f4d56]">
-                {selectedReservations.length}
+                {reservationMetrics.scheduled}
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                Activas en calendario
               </p>
             </div>
             <div className="rounded-lg border border-[#ead1d9] bg-[#fffafb] px-4 py-3">
               <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a7583]">
-                Filtro
+                Finalizadas
               </p>
-              <p className="mt-1 text-sm font-semibold text-[#5f4d56]">
-                {filter === "upcoming"
-                  ? "Proximas"
-                  : filter === "past"
-                    ? "Pasadas"
-                    : "Todas"}
+              <p className="mt-1 text-2xl font-semibold text-[#5f4d56]">
+                {reservationMetrics.finished}
+              </p>
+              <p className="mt-1 text-xs text-gray-500">
+                Pasadas o completadas
               </p>
             </div>
           </div>
