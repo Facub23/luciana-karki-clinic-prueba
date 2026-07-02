@@ -102,19 +102,18 @@ export default function AdminReservationsCalendar({
     return reservations.reduce(
       (acc, reservation) => {
         const startsAt = new Date(reservation.starts_at).getTime();
-        const isClosed = ["completed", "cancelled", "no_show"].includes(
-          reservation.status,
-        );
+        const isActiveAppointment =
+          reservation.status === "scheduled" || reservation.status === "confirmed";
 
-        if (startsAt >= filterNow && !isClosed) {
+        if (isActiveAppointment && startsAt >= filterNow) {
           acc.pending += 1;
         }
 
-        if (reservation.status === "scheduled" || reservation.status === "confirmed") {
+        if (isActiveAppointment) {
           acc.scheduled += 1;
         }
 
-        if (reservation.status === "completed" || startsAt < filterNow) {
+        if (reservation.status === "completed") {
           acc.finished += 1;
         }
 
@@ -368,7 +367,7 @@ export default function AdminReservationsCalendar({
                 {reservationMetrics.pending}
               </p>
               <p className="mt-1 text-xs text-gray-500">
-                Proximas sin cerrar
+                Por atender
               </p>
             </div>
             <div className="rounded-lg border border-[#ead1d9] bg-[#fffafb] px-4 py-3">
@@ -379,7 +378,7 @@ export default function AdminReservationsCalendar({
                 {reservationMetrics.scheduled}
               </p>
               <p className="mt-1 text-xs text-gray-500">
-                Activas en calendario
+                Con turno creado
               </p>
             </div>
             <div className="rounded-lg border border-[#ead1d9] bg-[#fffafb] px-4 py-3">
@@ -390,7 +389,7 @@ export default function AdminReservationsCalendar({
                 {reservationMetrics.finished}
               </p>
               <p className="mt-1 text-xs text-gray-500">
-                Pasadas o completadas
+                Marcadas como completadas
               </p>
             </div>
           </div>
