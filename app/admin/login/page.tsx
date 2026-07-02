@@ -35,11 +35,25 @@ export default async function AdminLoginPage({
           Panel privado
         </h1>
         <p className="mt-2 text-sm leading-6 text-gray-600">
-          Acceso reservado para gestionar consultas y seguimiento de pacientes.
+          Acceso reservado para gestionar consultas, contenido, reservas y
+          biblioteca de medios.
         </p>
 
         <form action="/api/admin/login" method="post" className="mt-6">
           <label className="block">
+            <span className="text-sm font-medium text-[#5f4d56]">
+              Email administrador
+            </span>
+            <input
+              name="email"
+              type="email"
+              autoComplete="email"
+              className="mt-2 w-full rounded-lg border border-[#ead1d9] bg-[#fffafb] px-4 py-3 text-[#4f4149] outline-none transition placeholder:text-[#9d828d] focus:border-[#c98fa1] focus:bg-white focus:ring-4 focus:ring-[#efd8df]"
+              placeholder="admin@clinica.com"
+            />
+          </label>
+
+          <label className="mt-4 block">
             <span className="text-sm font-medium text-[#5f4d56]">
               Contraseña
             </span>
@@ -55,9 +69,14 @@ export default async function AdminLoginPage({
 
           {error ? (
             <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
-              Contraseña incorrecta.
+              Acceso incorrecto. Revisa email y contraseña.
             </p>
           ) : null}
+
+          <p className="mt-3 text-xs leading-5 text-gray-500">
+            Si todavía no hay usuario de Supabase Auth, puedes dejar el email
+            vacío y usar la contraseña temporal del admin.
+          </p>
 
           <button
             type="submit"
