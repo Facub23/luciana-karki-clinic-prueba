@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import AdminContentManager from "@/components/AdminContentManager";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import { getHomeContentDefaults } from "@/lib/public-home-content";
 import { getPromotionContentDefaults } from "@/lib/public-promotions";
 import { getTreatmentContentDefaults } from "@/lib/public-treatments";
 import { ensureSiteContentDefaults, fetchSiteContent } from "@/lib/supabase-leads";
@@ -22,6 +23,7 @@ export default async function AdminContentPage() {
   }
 
   await ensureSiteContentDefaults([
+    ...getHomeContentDefaults(),
     ...getTreatmentContentDefaults(),
     ...getPromotionContentDefaults(),
   ]);

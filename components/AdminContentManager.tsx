@@ -29,6 +29,33 @@ type EditablePromotionContent = {
   shape: "compact" | "tall";
 };
 
+type EditableStructuredBlock = {
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  cards?: {
+    icon?: string;
+    title: string;
+    text: string;
+  }[];
+  videos?: {
+    src: string;
+    title: string;
+  }[];
+  images?: {
+    src: string;
+    alt: string;
+  }[];
+  steps?: {
+    title: string;
+    text: string;
+  }[];
+  items?: {
+    question: string;
+    answer: string;
+  }[];
+};
+
 const treatmentDetailFields = [
   ["duration", "Duración"],
   ["technique", "Técnica"],
@@ -416,6 +443,259 @@ export default function AdminContentManager({
     );
   }
 
+  function renderStructuredBlockEditor(item: SiteContentRecord) {
+    const block = parseJsonValue<EditableStructuredBlock>(item.value, {});
+
+    function updateBlock(nextValue: EditableStructuredBlock) {
+      updateDraft(item.id, stringifyJsonValue(nextValue));
+    }
+
+    function updateBlockField(
+      field: "eyebrow" | "title" | "description",
+      value: string,
+    ) {
+      updateBlock({ ...block, [field]: value });
+    }
+
+    function updateArrayItem<
+      Field extends "cards" | "videos" | "images" | "steps" | "items",
+    >(
+      field: Field,
+      index: number,
+      value: NonNullable<EditableStructuredBlock[Field]>[number],
+    ) {
+      const list = [...((block[field] ?? []) as NonNullable<EditableStructuredBlock[Field]>)];
+      list[index] = value;
+      updateBlock({ ...block, [field]: list });
+    }
+
+    function removeArrayItem(
+      field: "cards" | "videos" | "images" | "steps" | "items",
+      index: number,
+    ) {
+      updateBlock({
+        ...block,
+        [field]: (block[field] ?? []).filter((_, itemIndex) => itemIndex !== index),
+      });
+    }
+
+    return (
+      <div className="mt-4 space-y-5">
+        <div className="grid gap-4 md:grid-cols-2">
+          {"eyebrow" in block ? (
+            <AdminField label="Etiqueta superior">
+              <input
+                value={block.eyebrow ?? ""}
+                onChange={(event) =>
+                  updateBlockField("eyebrow", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+          ) : null}
+
+          {"title" in block ? (
+            <AdminField label="Título">
+              <input
+                value={block.title ?? ""}
+                onChange={(event) => updateBlockField("title", event.target.value)}
+                className="admin-content-input"
+              />
+            </AdminField>
+          ) : null}
+        </div>
+
+        {"description" in block ? (
+          <AdminField label="Descripción">
+            <textarea
+              value={block.description ?? ""}
+              onChange={(event) =>
+                updateBlockField("description", event.target.value)
+              }
+              className="admin-content-textarea min-h-24"
+            />
+          </AdminField>
+        ) : null}
+
+        {Array.isArray(block.cards) ? (
+          <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="text-sm font-semibold text-[#5f4d56]">Tarjetas</h3>
+              <button
+                type="button"
+                onClick={() =>
+                  updateBlock({
+                    ...block,
+                    cards: [
+                      ...(block.cards ?? []),
+                      { icon: "", title: "Nueva tarjeta", text: "" },
+                    ],
+                  })
+                }
+                className="inline-flex items-center gap-2 rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-xs font-semibold text-[#6b5b63] transition hover:bg-[#fff3f6]"
+              >
+                <Plus className="h-4 w-4" aria-hidden="true" />
+                Agregar tarjeta
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {block.cards.map((card, index) => (
+                <div key={index} className="rounded-lg bg-[#fffafb] p-4">
+                  {"icon" in card ? (
+                    <AdminField label="Icono">
+                      <input
+                        value={card.icon ?? ""}
+                        onChange={(event) =>
+                          updateArrayItem("cards", index, {
+                            ...card,
+                            icon: event.target.value,
+                          })
+                        }
+                        className="admin-content-input"
+                      />
+                    </AdminField>
+                  ) : null}
+
+                  <div className="mt-3">
+                    <AdminField label="Título">
+                      <input
+                        value={card.title}
+                        onChange={(event) =>
+                          updateArrayItem("cards", index, {
+                            ...card,
+                            title: event.target.value,
+                          })
+                        }
+                        className="admin-content-input"
+                      />
+                    </AdminField>
+                  </div>
+
+                  <div className="mt-3">
+                    <AdminField label="Texto">
+                      <textarea
+                        value={card.text}
+                        onChange={(event) =>
+                          updateArrayItem("cards", index, {
+                            ...card,
+                            text: event.target.value,
+                          })
+                        }
+                        className="admin-content-textarea min-h-24"
+                      />
+                    </AdminField>
+                  </div>
+
+                  <RemoveButton
+                    label="Quitar tarjeta"
+                    onClick={() => removeArrayItem("cards", index)}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        {Array.isArray(block.videos) ? (
+          <MediaListEditor
+            title="Videos"
+            addLabel="Agregar video"
+            items={block.videos}
+            srcLabel="Video"
+            textLabel="Título"
+            onAdd={() =>
+              updateBlock({
+                ...block,
+                videos: [...(block.videos ?? []), { src: "", title: "Nuevo video" }],
+              })
+            }
+            onChange={(index, nextItem) =>
+              updateArrayItem("videos", index, nextItem)
+            }
+            onRemove={(index) => removeArrayItem("videos", index)}
+          />
+        ) : null}
+
+        {Array.isArray(block.images) ? (
+          <MediaListEditor
+            title="Imágenes"
+            addLabel="Agregar imagen"
+            items={block.images.map((image) => ({
+              src: image.src,
+              title: image.alt,
+            }))}
+            srcLabel="Imagen"
+            textLabel="Texto alternativo"
+            onAdd={() =>
+              updateBlock({
+                ...block,
+                images: [
+                  ...(block.images ?? []),
+                  { src: "", alt: "Nueva imagen" },
+                ],
+              })
+            }
+            onChange={(index, nextItem) =>
+              updateArrayItem("images", index, {
+                src: nextItem.src,
+                alt: nextItem.title,
+              })
+            }
+            onRemove={(index) => removeArrayItem("images", index)}
+          />
+        ) : null}
+
+        {Array.isArray(block.steps) ? (
+          <TextPairListEditor
+            title="Pasos"
+            addLabel="Agregar paso"
+            items={block.steps}
+            textLabel="Texto"
+            onAdd={() =>
+              updateBlock({
+                ...block,
+                steps: [...(block.steps ?? []), { title: "Nuevo paso", text: "" }],
+              })
+            }
+            onChange={(index, nextItem) =>
+              updateArrayItem("steps", index, nextItem)
+            }
+            onRemove={(index) => removeArrayItem("steps", index)}
+          />
+        ) : null}
+
+        {Array.isArray(block.items) ? (
+          <TextPairListEditor
+            title="Preguntas"
+            addLabel="Agregar pregunta"
+            items={block.items.map((faq) => ({
+              title: faq.question,
+              text: faq.answer,
+            }))}
+            textLabel="Respuesta"
+            onAdd={() =>
+              updateBlock({
+                ...block,
+                items: [
+                  ...(block.items ?? []),
+                  { question: "Nueva pregunta", answer: "" },
+                ],
+              })
+            }
+            onChange={(index, nextItem) =>
+              updateArrayItem("items", index, {
+                question: nextItem.title,
+                answer: nextItem.text,
+              })
+            }
+            onRemove={(index) => removeArrayItem("items", index)}
+          />
+        ) : null}
+      </div>
+    );
+  }
+
   function renderContentEditor(item: SiteContentRecord) {
     if (item.section === "Tratamientos" && item.content_type === "json") {
       return renderTreatmentEditor(item);
@@ -423,6 +703,13 @@ export default function AdminContentManager({
 
     if (item.section === "Promociones" && item.content_type === "json") {
       return renderPromotionsEditor(item);
+    }
+
+    if (
+      (item.section === "Home" || item.section === "FAQ") &&
+      item.content_type === "json"
+    ) {
+      return renderStructuredBlockEditor(item);
     }
 
     return renderTextEditor(item);
@@ -578,6 +865,162 @@ function EditableList({
             No hay elementos todavía.
           </p>
         )}
+      </div>
+    </div>
+  );
+}
+
+function RemoveButton({
+  label,
+  onClick,
+}: {
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="mt-4 inline-flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100"
+    >
+      <Trash2 className="h-4 w-4" aria-hidden="true" />
+      {label}
+    </button>
+  );
+}
+
+function MediaListEditor({
+  title,
+  addLabel,
+  items,
+  srcLabel,
+  textLabel,
+  onAdd,
+  onChange,
+  onRemove,
+}: {
+  title: string;
+  addLabel: string;
+  items: { src: string; title: string }[];
+  srcLabel: string;
+  textLabel: string;
+  onAdd: () => void;
+  onChange: (index: number, item: { src: string; title: string }) => void;
+  onRemove: (index: number) => void;
+}) {
+  return (
+    <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold text-[#5f4d56]">{title}</h3>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="inline-flex items-center gap-2 rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-xs font-semibold text-[#6b5b63] transition hover:bg-[#fff3f6]"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          {addLabel}
+        </button>
+      </div>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        {items.map((item, index) => (
+          <div key={`${item.src}-${index}`} className="rounded-lg bg-[#fffafb] p-4">
+            <div
+              className="mb-4 flex aspect-video items-center justify-center rounded-lg border border-[#ead1d9] bg-white bg-cover bg-center text-xs text-gray-400"
+              style={item.src ? { backgroundImage: `url("${item.src}")` } : undefined}
+            >
+              {!item.src ? <ImageIcon className="h-5 w-5" /> : null}
+            </div>
+
+            <AdminField label={srcLabel}>
+              <input
+                value={item.src}
+                onChange={(event) =>
+                  onChange(index, { ...item, src: event.target.value })
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+
+            <div className="mt-3">
+              <AdminField label={textLabel}>
+                <input
+                  value={item.title}
+                  onChange={(event) =>
+                    onChange(index, { ...item, title: event.target.value })
+                  }
+                  className="admin-content-input"
+                />
+              </AdminField>
+            </div>
+
+            <RemoveButton label="Quitar" onClick={() => onRemove(index)} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TextPairListEditor({
+  title,
+  addLabel,
+  items,
+  textLabel,
+  onAdd,
+  onChange,
+  onRemove,
+}: {
+  title: string;
+  addLabel: string;
+  items: { title: string; text: string }[];
+  textLabel: string;
+  onAdd: () => void;
+  onChange: (index: number, item: { title: string; text: string }) => void;
+  onRemove: (index: number) => void;
+}) {
+  return (
+    <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold text-[#5f4d56]">{title}</h3>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="inline-flex items-center gap-2 rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-xs font-semibold text-[#6b5b63] transition hover:bg-[#fff3f6]"
+        >
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          {addLabel}
+        </button>
+      </div>
+
+      <div className="mt-4 space-y-4">
+        {items.map((item, index) => (
+          <div key={index} className="rounded-lg bg-[#fffafb] p-4">
+            <AdminField label="Título">
+              <input
+                value={item.title}
+                onChange={(event) =>
+                  onChange(index, { ...item, title: event.target.value })
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+
+            <div className="mt-3">
+              <AdminField label={textLabel}>
+                <textarea
+                  value={item.text}
+                  onChange={(event) =>
+                    onChange(index, { ...item, text: event.target.value })
+                  }
+                  className="admin-content-textarea min-h-24"
+                />
+              </AdminField>
+            </div>
+
+            <RemoveButton label="Quitar" onClick={() => onRemove(index)} />
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -30,6 +30,7 @@ import {
 } from "@/lib/site-content";
 import { getEditableTreatments } from "@/lib/public-treatments";
 import { getEditablePromotions } from "@/lib/public-promotions";
+import { getEditableHomeContent } from "@/lib/public-home-content";
 
 export const dynamic = "force-dynamic";
 
@@ -87,6 +88,7 @@ export default async function Home() {
   const whatsappUrl = whatsappUrlFromPhone(phoneLabel);
   const editableTreatments = getEditableTreatments(content);
   const editablePromotions = getEditablePromotions(content);
+  const editableHomeContent = getEditableHomeContent(content);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-[#faf7f8] to-white">
@@ -96,23 +98,23 @@ export default async function Home() {
 
       <Hero content={content} />
 
-      <Results />
+      <Results content={editableHomeContent.results} />
 
-      <WhyChooseUs />
+      <WhyChooseUs content={editableHomeContent.whyChooseUs} />
 
       <About whatsappUrl={whatsappUrl} />
 
-      <VideoSection />
+      <VideoSection content={editableHomeContent.videos} />
 
       <Gallery promotions={editablePromotions} />
 
-      <BeforeAfter />
+      <BeforeAfter content={editableHomeContent.beforeAfter} />
 
       <TreatmentsSection treatments={editableTreatments} />
 
-      <BookingProcess />
+      <BookingProcess content={editableHomeContent.booking} />
 
-      <FaqSection />
+      <FaqSection content={editableHomeContent.faq} />
 
       <section
         id="contacto"
