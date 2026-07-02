@@ -2,12 +2,25 @@
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { ImageIcon, LogOut, Plus, Save, Trash2, Upload } from "lucide-react";
+import {
+  CheckCircle2,
+  ImageIcon,
+  LogOut,
+  Plus,
+  Save,
+  Trash2,
+  Upload,
+  XCircle,
+} from "lucide-react";
 import AdminNav from "@/components/AdminNav";
 import { SiteContentRecord } from "@/lib/supabase-leads";
 
 type AdminContentManagerProps = {
   initialContent: SiteContentRecord[];
+};
+
+type AdminContentItem = SiteContentRecord & {
+  publishedValue: string;
 };
 
 type EditableTreatmentContent = {
@@ -105,17 +118,27 @@ function stringifyJsonValue(value: unknown) {
 export default function AdminContentManager({
   initialContent,
 }: AdminContentManagerProps) {
-  const [items, setItems] = useState(initialContent);
+  const [items, setItems] = useState<AdminContentItem[]>(
+    initialContent.map((item) => ({
+      ...item,
+      publishedValue: item.value,
+      value: item.draftValue ?? item.value,
+      hasDraft: Boolean(item.hasDraft),
+    })),
+  );
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
 
   const grouped = useMemo(() => {
-    return items.reduce<Record<string, SiteContentRecord[]>>((acc, item) => {
+    return items.reduce<Record<string, AdminContentItem[]>>((acc, item) => {
       acc[item.section] = acc[item.section] || [];
       acc[item.section].push(item);
       return acc;
     }, {});
   }, [items]);
+  const sections = Object.keys(grouped);
+  const [activeSection, setActiveSection] = useState(sections[0] ?? "");
+  const visibleSection = activeSection && grouped[activeSection] ? activeSection : sections[0];
 
   async function saveItem(id: string, value: string) {
     const item = items.find((currentItem) => currentItem.id === id);
@@ -146,16 +169,120 @@ export default function AdminContentManager({
         error?: string;
       };
 
-      if (!response.ok || !payload.ok || !payload.content) {
+      if (!response.ok || !payload.ok) {
         throw new Error(payload.error || "No se pudo guardar");
       }
 
       setItems((current) =>
-        current.map((item) => (item.id === id ? payload.content! : item)),
+        current.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                value,
+                draftValue: value,
+                hasDraft: true,
+                draftUpdatedAt: new Date().toISOString(),
+              }
+            : item,
+        ),
       );
-      setMessage("Contenido guardado.");
+      setMessage("Borrador guardado. La web pública todavía no cambió.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "No se pudo guardar");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  async function publishItem(id: string) {
+    const item = items.find((currentItem) => currentItem.id === id);
+
+    if (!item) return;
+
+    setSavingId(id);
+    setMessage("");
+
+    try {
+      const response = await fetch(`/api/admin/content/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "publish" }),
+      });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        content?: SiteContentRecord;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || "No se pudo publicar");
+      }
+
+      setItems((current) =>
+        current.map((currentItem) =>
+          currentItem.id === id
+            ? {
+                ...currentItem,
+                value: item.value,
+                publishedValue: item.value,
+                draftValue: null,
+                hasDraft: false,
+                draftUpdatedAt: null,
+              }
+            : currentItem,
+        ),
+      );
+      setMessage("Contenido publicado en la web.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No se pudo publicar");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  async function discardDraft(id: string) {
+    const item = items.find((currentItem) => currentItem.id === id);
+
+    if (!item) return;
+
+    setSavingId(id);
+    setMessage("");
+
+    try {
+      const response = await fetch(`/api/admin/content/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "discard" }),
+      });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || "No se pudo descartar");
+      }
+
+      setItems((current) =>
+        current.map((currentItem) =>
+          currentItem.id === id
+            ? {
+                ...currentItem,
+                value: currentItem.publishedValue,
+                draftValue: null,
+                hasDraft: false,
+                draftUpdatedAt: null,
+              }
+            : currentItem,
+        ),
+      );
+      setMessage("Borrador descartado.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No se pudo descartar");
     } finally {
       setSavingId(null);
     }
@@ -981,9 +1108,8 @@ export default function AdminContentManager({
 
       <section className="mx-auto max-w-7xl px-5 py-6">
         <div className="rounded-lg border border-[#ead1d9] bg-white p-4 text-sm leading-6 text-gray-600 shadow-sm">
-          Los cambios quedan guardados en Supabase y ya alimentan los bloques
-          principales de la web pública. Seguiremos conectando tratamientos,
-          promociones e imágenes por fases.
+          Los cambios se guardan primero como borrador. La web pública solo
+          cambia cuando presionas Publicar.
         </div>
 
         {message ? (
@@ -992,43 +1118,111 @@ export default function AdminContentManager({
           </p>
         ) : null}
 
+        <div className="mt-5 flex gap-2 overflow-x-auto rounded-lg border border-[#ead1d9] bg-white p-2 shadow-sm">
+          {sections.map((section) => {
+            const draftCount = grouped[section].filter((item) => item.hasDraft).length;
+            const isActive = section === visibleSection;
+
+            return (
+              <button
+                key={section}
+                type="button"
+                onClick={() => setActiveSection(section)}
+                className={`inline-flex shrink-0 items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition ${
+                  isActive
+                    ? "bg-[#c98fa1] text-white"
+                    : "bg-[#fffafb] text-[#6b5b63] hover:bg-[#fff3f6]"
+                }`}
+              >
+                {section}
+                {draftCount ? (
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs ${
+                      isActive ? "bg-white/20" : "bg-[#f7dfe7] text-[#a8697e]"
+                    }`}
+                  >
+                    {draftCount}
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="mt-5 space-y-5">
-          {Object.entries(grouped).map(([section, records]) => (
+          {visibleSection ? (
             <section
-              key={section}
+              key={visibleSection}
               className="rounded-lg border border-[#ead1d9] bg-white p-5 shadow-sm"
             >
               <h2 className="text-lg font-semibold text-[#5f4d56]">
-                {section}
+                {visibleSection}
               </h2>
               <div className="mt-4 grid gap-4">
-                {records.map((item) => (
+                {grouped[visibleSection].map((item) => (
                   <div key={item.id} className="rounded-lg bg-[#fffafb] p-4">
-                    <div className="block">
-                      <span className="text-sm font-semibold text-[#5f4d56]">
-                        {item.label}
-                      </span>
-                      {item.description ? (
-                        <span className="mt-1 block text-xs text-gray-500">
-                          {item.description}
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <span className="text-sm font-semibold text-[#5f4d56]">
+                          {item.label}
                         </span>
-                      ) : null}
+                        {item.hasDraft ? (
+                          <span className="ml-2 rounded-full bg-amber-50 px-2 py-1 text-xs font-semibold text-amber-700">
+                            Borrador sin publicar
+                          </span>
+                        ) : (
+                          <span className="ml-2 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-700">
+                            Publicado
+                          </span>
+                        )}
+                        {item.description ? (
+                          <span className="mt-1 block text-xs text-gray-500">
+                            {item.description}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="block">
                       {renderContentEditor(item)}
                     </div>
-                    <button
-                      type="button"
-                      disabled={savingId === item.id}
-                      onClick={() => saveItem(item.id, item.value)}
-                      className="mt-3 inline-flex items-center gap-2 rounded-lg bg-[#c98fa1] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#bd7f93] disabled:cursor-wait disabled:opacity-60"
-                    >
-                      <Save className="h-4 w-4" aria-hidden="true" />
-                      {savingId === item.id ? "Guardando" : "Guardar"}
-                    </button>
+
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        disabled={savingId === item.id}
+                        onClick={() => saveItem(item.id, item.value)}
+                        className="inline-flex items-center gap-2 rounded-lg bg-[#c98fa1] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#bd7f93] disabled:cursor-wait disabled:opacity-60"
+                      >
+                        <Save className="h-4 w-4" aria-hidden="true" />
+                        {savingId === item.id ? "Guardando" : "Guardar borrador"}
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={!item.hasDraft || savingId === item.id}
+                        onClick={() => publishItem(item.id)}
+                        className="inline-flex items-center gap-2 rounded-lg border border-green-100 bg-green-50 px-4 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                        Publicar
+                      </button>
+
+                      <button
+                        type="button"
+                        disabled={!item.hasDraft || savingId === item.id}
+                        onClick={() => discardDraft(item.id)}
+                        className="inline-flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <XCircle className="h-4 w-4" aria-hidden="true" />
+                        Descartar
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             </section>
-          ))}
+          ) : null}
         </div>
       </section>
     </main>

@@ -56,6 +56,9 @@ export type SiteContentRecord = {
   content_type: "text" | "textarea" | "url" | "json";
   value: string;
   description: string | null;
+  draftValue?: string | null;
+  draftUpdatedAt?: string | null;
+  hasDraft?: boolean;
 };
 
 export type SiteContentDefaultInput = Pick<
@@ -249,9 +252,31 @@ export async function updateAdminLead(id: string, input: LeadUpdateInput) {
 }
 
 export async function fetchSiteContent() {
-  return supabaseRequest<SiteContentRecord[]>(
+  const records = await supabaseRequest<SiteContentRecord[]>(
     "site_content?select=*&order=section.asc,label.asc",
   );
+  const draftPrefix = "__draft__:";
+  const draftsByKey = new Map(
+    records
+      .filter((record) => record.section.startsWith(draftPrefix))
+      .map((record) => [
+        `${record.section.slice(draftPrefix.length)}::${record.label}`,
+        record,
+      ]),
+  );
+
+  return records
+    .filter((record) => !record.section.startsWith(draftPrefix))
+    .map((record) => {
+      const draft = draftsByKey.get(`${record.section}::${record.label}`);
+
+      return {
+        ...record,
+        draftValue: draft?.value ?? null,
+        draftUpdatedAt: draft?.updated_at ?? null,
+        hasDraft: Boolean(draft),
+      };
+    });
 }
 
 export async function ensureSiteContentDefaults(defaults: SiteContentDefaultInput[]) {
@@ -289,6 +314,80 @@ export async function updateSiteContent(
       body: JSON.stringify({
         value: input.value,
       }),
+    },
+  );
+}
+
+export async function saveSiteContentDraft(
+  id: string,
+  input: Pick<SiteContentRecord, "value">,
+) {
+  const [content] = await supabaseRequest<SiteContentRecord[]>(
+    `site_content?id=eq.${encodeURIComponent(id)}&select=*&limit=1`,
+  );
+
+  if (!content) {
+    throw new Error("Contenido no encontrado");
+  }
+
+  return supabaseRequest<SiteContentRecord[]>(
+    "site_content?on_conflict=section,label&select=*",
+    {
+      method: "POST",
+      headers: {
+        Prefer: "resolution=merge-duplicates,return=representation",
+      },
+      body: JSON.stringify({
+        section: `__draft__:${content.section}`,
+        label: content.label,
+        content_type: content.content_type,
+        value: input.value,
+        description: `Borrador de ${content.section} / ${content.label}`,
+      }),
+    },
+  );
+}
+
+export async function publishSiteContentDraft(id: string) {
+  const [content] = await supabaseRequest<SiteContentRecord[]>(
+    `site_content?id=eq.${encodeURIComponent(id)}&select=*&limit=1`,
+  );
+
+  if (!content) {
+    throw new Error("Contenido no encontrado");
+  }
+
+  const draftSection = `__draft__:${content.section}`;
+  const [draft] = await supabaseRequest<SiteContentRecord[]>(
+    `site_content?section=eq.${encodeURIComponent(draftSection)}&label=eq.${encodeURIComponent(content.label)}&select=*&limit=1`,
+  );
+
+  if (!draft) {
+    throw new Error("No hay borrador para publicar");
+  }
+
+  const [published] = await updateSiteContent(id, { value: draft.value });
+  await discardSiteContentDraft(id);
+
+  return published;
+}
+
+export async function discardSiteContentDraft(id: string) {
+  const [content] = await supabaseRequest<SiteContentRecord[]>(
+    `site_content?id=eq.${encodeURIComponent(id)}&select=*&limit=1`,
+  );
+
+  if (!content) {
+    throw new Error("Contenido no encontrado");
+  }
+
+  await supabaseRequest<null>(
+    `site_content?section=eq.${encodeURIComponent(`__draft__:${content.section}`)}&label=eq.${encodeURIComponent(content.label)}`,
+    {
+      method: "DELETE",
+      headers: {
+        Prefer: "return=minimal",
+      },
     },
   );
 }
