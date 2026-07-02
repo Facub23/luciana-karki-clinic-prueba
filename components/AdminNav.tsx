@@ -4,6 +4,7 @@ import {
   CalendarDays,
   FileImage,
   FilePenLine,
+  UserCog,
   Users,
 } from "lucide-react";
 
@@ -13,6 +14,7 @@ const navItems = [
   { href: "/admin/contenido", label: "Contenido", icon: FilePenLine },
   { href: "/admin/medios", label: "Medios", icon: FileImage },
   { href: "/admin/reservas", label: "Reservas", icon: CalendarDays },
+  { href: "/admin/usuarios", label: "Usuarios", icon: UserCog },
 ];
 
 export default function AdminNav() {

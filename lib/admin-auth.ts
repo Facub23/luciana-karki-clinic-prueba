@@ -8,6 +8,7 @@ type AdminSessionPayload = {
   issuedAt: number;
   provider: "supabase";
   email?: string;
+  role?: "admin";
 };
 
 function getSessionSecret() {
@@ -56,7 +57,7 @@ function getAllowedAdminEmails() {
     .filter(Boolean);
 }
 
-function isAllowedAdminEmail(email: string) {
+export function isAllowedAdminEmail(email: string) {
   const allowedEmails = getAllowedAdminEmails();
 
   if (!allowedEmails.length) {
@@ -72,6 +73,7 @@ export async function createAdminSession(input: { email: string }) {
     issuedAt: Date.now(),
     provider: "supabase",
     email: input.email,
+    role: "admin",
   });
   const signature = signSession(payload);
 
@@ -120,9 +122,7 @@ export async function isAdminAuthenticated() {
       return false;
     }
 
-    return payload.provider === "supabase" && payload.email
-      ? isAllowedAdminEmail(payload.email)
-      : false;
+    return payload.provider === "supabase" && payload.email && payload.role === "admin";
   }
 
   return false;
@@ -139,10 +139,6 @@ export async function authenticateSupabaseAdmin(input: {
     process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !anonKey || !input.email || !input.password) {
-    return null;
-  }
-
-  if (!isAllowedAdminEmail(input.email)) {
     return null;
   }
 
@@ -169,11 +165,20 @@ export async function authenticateSupabaseAdmin(input: {
   const payload = (await response.json()) as {
     user?: {
       email?: string;
+      app_metadata?: {
+        role?: string;
+      };
     };
   };
   const email = payload.user?.email;
 
-  if (!email || !isAllowedAdminEmail(email)) {
+  if (!email) {
+    return null;
+  }
+
+  const isAdminRole = payload.user?.app_metadata?.role === "admin";
+
+  if (!isAdminRole && !isAllowedAdminEmail(email)) {
     return null;
   }
 

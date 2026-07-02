@@ -1,80 +1,32 @@
 import { NextResponse } from "next/server";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
+import {
+  createOrUpdateAdminUser,
+  listAdminUsers,
+  updateAdminUser,
+} from "@/lib/supabase-admin-users";
 
-function getSupabaseAdminConfig() {
-  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceRoleKey) {
-    throw new Error("Supabase admin environment variables are not configured");
+export async function GET() {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
   }
 
-  return { supabaseUrl, serviceRoleKey };
-}
+  try {
+    const users = await listAdminUsers();
 
-function getAllowedAdminEmails() {
-  const rawEmails =
-    process.env.ADMIN_ALLOWED_EMAILS || process.env.LEAD_NOTIFICATION_EMAIL_TO || "";
+    return NextResponse.json({ ok: true, users });
+  } catch (error) {
+    console.error("Admin users fetch failed", error);
 
-  return rawEmails
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-}
-
-function isAllowedAdminEmail(email: string) {
-  return getAllowedAdminEmails().includes(email.trim().toLowerCase());
-}
-
-async function supabaseAuthRequest<T>(path: string, init: RequestInit = {}) {
-  const { supabaseUrl, serviceRoleKey } = getSupabaseAdminConfig();
-  const response = await fetch(`${supabaseUrl}${path}`, {
-    ...init,
-    headers: {
-      apikey: serviceRoleKey,
-      Authorization: `Bearer ${serviceRoleKey}`,
-      "Content-Type": "application/json",
-      ...(init.headers ?? {}),
-    },
-    cache: "no-store",
-  });
-  const responseText = await response.text();
-  const payload = responseText ? (JSON.parse(responseText) as T) : null;
-
-  if (!response.ok) {
-    throw new Error(
-      `Supabase Auth request failed ${response.status}: ${responseText}`,
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          error instanceof Error ? error.message : "No se pudieron cargar usuarios",
+      },
+      { status: 500 },
     );
   }
-
-  return payload;
-}
-
-type SupabaseUser = {
-  id: string;
-  email?: string;
-};
-
-async function findUserByEmail(email: string) {
-  for (let page = 1; page <= 10; page += 1) {
-    const payload = await supabaseAuthRequest<{ users?: SupabaseUser[] }>(
-      `/auth/v1/admin/users?page=${page}&per_page=100`,
-    );
-    const users = payload?.users ?? [];
-    const user = users.find(
-      (item) => item.email?.toLowerCase() === email.toLowerCase(),
-    );
-
-    if (user) {
-      return user;
-    }
-
-    if (users.length < 100) {
-      return null;
-    }
-  }
-
-  return null;
 }
 
 export async function POST(request: Request) {
@@ -97,42 +49,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!isAllowedAdminEmail(email)) {
-      return NextResponse.json(
-        { ok: false, error: "Email no permitido como administrador" },
-        { status: 403 },
-      );
-    }
+    const action = await createOrUpdateAdminUser({ email, password });
 
-    const existingUser = await findUserByEmail(email);
-
-    if (existingUser) {
-      await supabaseAuthRequest(`/auth/v1/admin/users/${existingUser.id}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          email,
-          password,
-          email_confirm: true,
-          user_metadata: { role: "admin", source: "admin-panel" },
-          app_metadata: { role: "admin" },
-        }),
-      });
-
-      return NextResponse.json({ ok: true, action: "updated", email });
-    }
-
-    await supabaseAuthRequest("/auth/v1/admin/users", {
-      method: "POST",
-      body: JSON.stringify({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { role: "admin", source: "admin-panel" },
-        app_metadata: { role: "admin" },
-      }),
-    });
-
-    return NextResponse.json({ ok: true, action: "created", email });
+    return NextResponse.json({ ok: true, action, email });
   } catch (error) {
     console.error("Admin user setup failed", error);
 
@@ -141,6 +60,46 @@ export async function POST(request: Request) {
         ok: false,
         error:
           error instanceof Error ? error.message : "No se pudo crear el usuario",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ ok: false, error: "No autorizado" }, { status: 401 });
+  }
+
+  try {
+    const payload = (await request.json()) as {
+      id?: string;
+      password?: string;
+      active?: boolean;
+    };
+
+    if (!payload.id) {
+      return NextResponse.json(
+        { ok: false, error: "Usuario requerido" },
+        { status: 400 },
+      );
+    }
+
+    await updateAdminUser({
+      id: payload.id,
+      password: payload.password,
+      active: payload.active,
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Admin user update failed", error);
+
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          error instanceof Error ? error.message : "No se pudo actualizar usuario",
       },
       { status: 500 },
     );
