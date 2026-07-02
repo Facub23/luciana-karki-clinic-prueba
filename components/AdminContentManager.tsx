@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 import {
   CheckCircle2,
+  Eye,
   ImageIcon,
   LogOut,
   Plus,
@@ -128,6 +129,9 @@ export default function AdminContentManager({
   );
   const [savingId, setSavingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
+  const [previewOpenIds, setPreviewOpenIds] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const grouped = useMemo(() => {
     return items.reduce<Record<string, AdminContentItem[]>>((acc, item) => {
@@ -291,6 +295,161 @@ export default function AdminContentManager({
   function updateDraft(id: string, value: string) {
     setItems((current) =>
       current.map((item) => (item.id === id ? { ...item, value } : item)),
+    );
+  }
+
+  function togglePreview(id: string) {
+    setPreviewOpenIds((current) => {
+      const next = new Set(current);
+
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+
+      return next;
+    });
+  }
+
+  function getPreviewLines(item: SiteContentRecord, value: string) {
+    if (!value.trim()) {
+      return ["Sin contenido."];
+    }
+
+    if (item.content_type !== "json") {
+      return value
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .slice(0, 10);
+    }
+
+    try {
+      const parsed = JSON.parse(value) as unknown;
+
+      if (Array.isArray(parsed)) {
+        return parsed.slice(0, 8).map((entry, index) => {
+          if (entry && typeof entry === "object") {
+            const record = entry as Record<string, unknown>;
+            const title =
+              record.name || record.title || record.alt || record.question || `Item ${index + 1}`;
+            const detail =
+              record.price || record.shortDescription || record.description || record.text || "";
+
+            return [title, detail].filter(Boolean).join(" · ");
+          }
+
+          return String(entry);
+        });
+      }
+
+      if (parsed && typeof parsed === "object") {
+        const record = parsed as Record<string, unknown>;
+        const lines: string[] = [];
+
+        for (const key of [
+          "eyebrow",
+          "title",
+          "description",
+          "brandName",
+          "ctaLabel",
+          "copyright",
+          "body",
+        ]) {
+          const field = record[key];
+
+          if (typeof field === "string" && field.trim()) {
+            lines.push(`${key}: ${field}`);
+          }
+        }
+
+        for (const key of ["cards", "items", "videos", "images", "steps", "addressLines"]) {
+          const field = record[key];
+
+          if (Array.isArray(field) && field.length) {
+            lines.push(`${key}: ${field.length} elementos`);
+          }
+        }
+
+        return lines.length ? lines.slice(0, 10) : [JSON.stringify(parsed, null, 2)];
+      }
+
+      return [String(parsed)];
+    } catch {
+      return ["El contenido todavía no tiene un formato válido para previsualizar."];
+    }
+  }
+
+  function renderPreviewPanel(
+    title: string,
+    value: string,
+    item: SiteContentRecord,
+    tone: "published" | "draft",
+  ) {
+    const lines = getPreviewLines(item, value);
+
+    return (
+      <div
+        className={`rounded-lg border p-4 ${
+          tone === "published"
+            ? "border-[#ead1d9] bg-white"
+            : "border-[#d9ebdf] bg-[#f8fffa]"
+        }`}
+      >
+        <p
+          className={`text-xs font-semibold uppercase tracking-[0.16em] ${
+            tone === "published" ? "text-[#9a7583]" : "text-green-700"
+          }`}
+        >
+          {title}
+        </p>
+        <div className="mt-3 space-y-2 text-sm leading-6 text-[#5f4d56]">
+          {lines.map((line, index) => (
+            <p
+              key={`${title}-${index}-${line.slice(0, 12)}`}
+              className="rounded-md bg-white/70 px-3 py-2"
+            >
+              {line}
+            </p>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function renderContentPreview(item: AdminContentItem) {
+    const hasLocalChange = item.value !== item.publishedValue;
+    const draftTitle = item.hasDraft ? "Borrador guardado" : "Edición actual";
+
+    return (
+      <div className="mt-4 rounded-lg border border-[#ead1d9] bg-white p-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-sm font-semibold text-[#5f4d56]">
+              Vista previa antes/después
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Revisa lo publicado frente a lo que se publicaría antes de tocar
+              el botón Publicar.
+            </p>
+          </div>
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-semibold ${
+              hasLocalChange
+                ? "bg-amber-50 text-amber-700"
+                : "bg-green-50 text-green-700"
+            }`}
+          >
+            {hasLocalChange ? "Hay cambios" : "Sin cambios"}
+          </span>
+        </div>
+
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          {renderPreviewPanel("Publicado ahora", item.publishedValue, item, "published")}
+          {renderPreviewPanel(draftTitle, item.value, item, "draft")}
+        </div>
+      </div>
     );
   }
 
@@ -1187,7 +1346,20 @@ export default function AdminContentManager({
                       {renderContentEditor(item)}
                     </div>
 
+                    {previewOpenIds.has(item.id) ? renderContentPreview(item) : null}
+
                     <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => togglePreview(item.id)}
+                        className="inline-flex items-center gap-2 rounded-lg border border-[#ead1d9] bg-white px-4 py-2 text-sm font-semibold text-[#6b5b63] transition hover:bg-[#fff3f6]"
+                      >
+                        <Eye className="h-4 w-4" aria-hidden="true" />
+                        {previewOpenIds.has(item.id)
+                          ? "Ocultar vista previa"
+                          : "Ver antes/después"}
+                      </button>
+
                       <button
                         type="button"
                         disabled={savingId === item.id}
