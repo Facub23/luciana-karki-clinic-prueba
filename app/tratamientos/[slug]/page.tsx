@@ -24,7 +24,15 @@ import {
   treatmentKeywords,
 } from "@/lib/seo";
 import {
-  getTreatmentBySlug,
+  getEditableTreatmentBySlug,
+} from "@/lib/public-treatments";
+import {
+  getPublicSiteContent,
+  normalizePhoneForWhatsapp,
+  phoneLabelFromContent,
+  whatsappUrlFromPhone,
+} from "@/lib/site-content";
+import {
   treatments,
   type Treatment,
   type TreatmentDetails,
@@ -35,6 +43,8 @@ type TreatmentPageProps = {
     slug: string;
   }>;
 };
+
+export const dynamic = "force-dynamic";
 
 function getPageDetails(treatment: Treatment): TreatmentDetails {
   const isBody = treatment.category.includes("Corporales");
@@ -81,7 +91,8 @@ export async function generateMetadata({
   params,
 }: TreatmentPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const treatment = getTreatmentBySlug(slug);
+  const content = await getPublicSiteContent();
+  const treatment = getEditableTreatmentBySlug(slug, content);
 
   if (!treatment) {
     return {};
@@ -126,12 +137,16 @@ export async function generateMetadata({
 
 export default async function TreatmentPage({ params }: TreatmentPageProps) {
   const { slug } = await params;
-  const treatment = getTreatmentBySlug(slug);
+  const content = await getPublicSiteContent();
+  const treatment = getEditableTreatmentBySlug(slug, content);
 
   if (!treatment) {
     notFound();
   }
 
+  const phoneLabel = phoneLabelFromContent(content);
+  const whatsappUrl = whatsappUrlFromPhone(phoneLabel);
+  const phoneNumber = normalizePhoneForWhatsapp(phoneLabel);
   const pageDetails = getPageDetails(treatment);
   const detailItems = [
     { label: "Duración", value: pageDetails.duration, icon: Timer },
@@ -150,7 +165,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-[#faf7f8] to-white">
       <JsonLd data={treatmentJsonLd(treatment)} />
-      <Navbar />
+      <Navbar whatsappUrl={whatsappUrl} />
 
       <section className="max-w-7xl mx-auto grid gap-12 px-6 py-20 lg:grid-cols-[1fr_420px] lg:items-start">
         <div>
@@ -319,7 +334,11 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
         </div>
 
         <div className="lg:sticky lg:top-28">
-          <LeadForm compact treatmentName={treatment.name} />
+          <LeadForm
+            compact
+            treatmentName={treatment.name}
+            phoneNumber={phoneNumber}
+          />
         </div>
       </section>
 
@@ -348,8 +367,8 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
         ]}
       />
 
-      <WhatsappButton />
-      <Footer />
+      <WhatsappButton whatsappUrl={whatsappUrl} />
+      <Footer phoneLabel={phoneLabel} whatsappUrl={whatsappUrl} />
     </main>
   );
 }

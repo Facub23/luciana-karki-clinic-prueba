@@ -1,8 +1,14 @@
 import { ArrowRight } from "lucide-react";
 import TrackedLink from "@/components/TrackedLink";
-import { treatments } from "@/lib/treatments";
+import { treatments as defaultTreatments, type Treatment } from "@/lib/treatments";
 
-export default function TreatmentsSection() {
+type TreatmentsSectionProps = {
+  treatments?: Treatment[];
+};
+
+export default function TreatmentsSection({
+  treatments = defaultTreatments,
+}: TreatmentsSectionProps) {
   return (
     <section id="tratamientos" className="mx-auto max-w-7xl px-6 py-20 lg:py-28">
       <div className="mx-auto mb-14 max-w-3xl text-center">

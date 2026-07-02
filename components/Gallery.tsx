@@ -1,29 +1,14 @@
 import Image from "next/image";
+import {
+  defaultPromotions,
+  type PromotionItem,
+} from "@/lib/public-promotions";
 
-const promotions = [
-  {
-    src: "/images/tratamiento-1.jpeg",
-    alt: "Promoción de relleno de labios con ácido hialurónico",
-    shape: "compact",
-  },
-  {
-    src: "/images/tratamiento-2.jpeg",
-    alt: "Promoción pack anti-age completo",
-    shape: "compact",
-  },
-  {
-    src: "/images/tratamiento-3.jpeg",
-    alt: "Promoción de medicina estética",
-    shape: "tall",
-  },
-  {
-    src: "/images/tratamiento-4.png",
-    alt: "Promoción peeling axilas y zona íntima",
-    shape: "tall",
-  },
-];
+type GalleryProps = {
+  promotions?: PromotionItem[];
+};
 
-export default function Gallery() {
+export default function Gallery({ promotions = defaultPromotions }: GalleryProps) {
   return (
     <section className="bg-white py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-6">

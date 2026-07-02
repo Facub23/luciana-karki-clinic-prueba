@@ -58,6 +58,11 @@ export type SiteContentRecord = {
   description: string | null;
 };
 
+export type SiteContentDefaultInput = Pick<
+  SiteContentRecord,
+  "section" | "label" | "content_type" | "value" | "description"
+>;
+
 export type ReservationStatus =
   | "scheduled"
   | "confirmed"
@@ -247,6 +252,27 @@ export async function fetchSiteContent() {
   return supabaseRequest<SiteContentRecord[]>(
     "site_content?select=*&order=section.asc,label.asc",
   );
+}
+
+export async function ensureSiteContentDefaults(defaults: SiteContentDefaultInput[]) {
+  if (!defaults.length) {
+    return;
+  }
+
+  try {
+    await supabaseRequest<null>(
+      "site_content?on_conflict=section,label",
+      {
+        method: "POST",
+        headers: {
+          Prefer: "resolution=ignore-duplicates,return=minimal",
+        },
+        body: JSON.stringify(defaults),
+      },
+    );
+  } catch (error) {
+    console.error("Supabase site content defaults insert failed", error);
+  }
 }
 
 export async function updateSiteContent(

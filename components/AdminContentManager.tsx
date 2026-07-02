@@ -25,6 +25,17 @@ export default function AdminContentManager({
   }, [items]);
 
   async function saveItem(id: string, value: string) {
+    const item = items.find((currentItem) => currentItem.id === id);
+
+    if (item?.content_type === "json") {
+      try {
+        JSON.parse(value);
+      } catch {
+        setMessage("El JSON no es válido. Revisa comas, comillas y llaves.");
+        return;
+      }
+    }
+
     setSavingId(id);
     setMessage("");
 
