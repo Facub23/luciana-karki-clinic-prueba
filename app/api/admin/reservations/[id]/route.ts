@@ -3,6 +3,11 @@ import { isAdminAuthenticated } from "@/lib/admin-auth";
 import { deleteReservation, updateReservation } from "@/lib/supabase-leads";
 
 const updateReservationSchema = z.object({
+  patientName: z.string().trim().min(2).max(160).optional(),
+  phone: z.string().trim().min(6).max(40).optional(),
+  treatment: z.string().trim().min(2).max(180).optional(),
+  startsAt: z.string().datetime().optional(),
+  endsAt: z.string().datetime().optional().or(z.literal("")),
   status: z
     .enum(["scheduled", "confirmed", "completed", "cancelled", "no_show"])
     .optional(),
