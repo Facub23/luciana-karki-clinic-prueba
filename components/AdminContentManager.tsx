@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
-import { ImageIcon, LogOut, Plus, Save, Trash2 } from "lucide-react";
+import { ImageIcon, LogOut, Plus, Save, Trash2, Upload } from "lucide-react";
 import AdminNav from "@/components/AdminNav";
 import { SiteContentRecord } from "@/lib/supabase-leads";
 
@@ -292,12 +292,18 @@ export default function AdminContentManager({
 
         <AdminField label="Imagen del tratamiento">
           <div className="grid gap-3 md:grid-cols-[1fr_180px]">
-            <input
-              value={treatment.image ?? ""}
-              onChange={(event) => updateField("image", event.target.value)}
-              className="admin-content-input"
-              placeholder="/images/tratamiento-1.jpeg"
-            />
+            <div className="space-y-2">
+              <input
+                value={treatment.image ?? ""}
+                onChange={(event) => updateField("image", event.target.value)}
+                className="admin-content-input"
+                placeholder="/images/tratamiento-1.jpeg"
+              />
+              <UploadButton
+                accept="image/*"
+                onUploaded={(url) => updateField("image", url)}
+              />
+            </div>
             <div
               className="flex min-h-28 items-center justify-center rounded-lg border border-[#ead1d9] bg-white bg-cover bg-center text-xs text-gray-400"
               style={
@@ -389,14 +395,20 @@ export default function AdminContentManager({
 
               <div className="space-y-3">
                 <AdminField label="Imagen">
-                  <input
-                    value={promotion.src}
-                    onChange={(event) =>
-                      updatePromotion(index, "src", event.target.value)
-                    }
-                    className="admin-content-input"
-                    placeholder="/images/promocion.jpg"
-                  />
+                  <div className="space-y-2">
+                    <input
+                      value={promotion.src}
+                      onChange={(event) =>
+                        updatePromotion(index, "src", event.target.value)
+                      }
+                      className="admin-content-input"
+                      placeholder="/images/promocion.jpg"
+                    />
+                    <UploadButton
+                      accept="image/*"
+                      onUploaded={(url) => updatePromotion(index, "src", url)}
+                    />
+                  </div>
                 </AdminField>
 
                 <AdminField label="Texto alternativo">
@@ -625,6 +637,7 @@ export default function AdminContentManager({
             items={block.videos}
             srcLabel="Video"
             textLabel="Título"
+            accept="video/mp4,video/webm"
             onAdd={() =>
               updateBlock({
                 ...block,
@@ -648,6 +661,7 @@ export default function AdminContentManager({
             }))}
             srcLabel="Imagen"
             textLabel="Texto alternativo"
+            accept="image/*"
             onAdd={() =>
               updateBlock({
                 ...block,
@@ -1119,6 +1133,7 @@ function MediaListEditor({
   items,
   srcLabel,
   textLabel,
+  accept = "image/*,video/mp4,video/webm",
   onAdd,
   onChange,
   onRemove,
@@ -1128,6 +1143,7 @@ function MediaListEditor({
   items: { src: string; title: string }[];
   srcLabel: string;
   textLabel: string;
+  accept?: string;
   onAdd: () => void;
   onChange: (index: number, item: { src: string; title: string }) => void;
   onRemove: (index: number) => void;
@@ -1157,13 +1173,19 @@ function MediaListEditor({
             </div>
 
             <AdminField label={srcLabel}>
-              <input
-                value={item.src}
-                onChange={(event) =>
-                  onChange(index, { ...item, src: event.target.value })
-                }
-                className="admin-content-input"
-              />
+              <div className="space-y-2">
+                <input
+                  value={item.src}
+                  onChange={(event) =>
+                    onChange(index, { ...item, src: event.target.value })
+                  }
+                  className="admin-content-input"
+                />
+                <UploadButton
+                  accept={accept}
+                  onUploaded={(url) => onChange(index, { ...item, src: url })}
+                />
+              </div>
             </AdminField>
 
             <div className="mt-3">
@@ -1246,6 +1268,77 @@ function TextPairListEditor({
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function UploadButton({
+  accept,
+  onUploaded,
+}: {
+  accept: string;
+  onUploaded: (url: string) => void;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+  const [error, setError] = useState("");
+
+  async function uploadFile(file: File) {
+    setIsUploading(true);
+    setError("");
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        url?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.url) {
+        throw new Error(payload.error || "No se pudo subir el archivo");
+      }
+
+      onUploaded(payload.url);
+    } catch (uploadError) {
+      setError(
+        uploadError instanceof Error
+          ? uploadError.message
+          : "No se pudo subir el archivo",
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  return (
+    <div>
+      <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-xs font-semibold text-[#6b5b63] transition hover:bg-[#fff3f6]">
+        <Upload className="h-4 w-4" aria-hidden="true" />
+        {isUploading ? "Subiendo..." : "Subir archivo"}
+        <input
+          type="file"
+          accept={accept}
+          disabled={isUploading}
+          className="sr-only"
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+
+            if (file) {
+              void uploadFile(file);
+            }
+
+            event.target.value = "";
+          }}
+        />
+      </label>
+
+      {error ? <p className="mt-2 text-xs text-red-700">{error}</p> : null}
     </div>
   );
 }
