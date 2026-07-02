@@ -1,14 +1,52 @@
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import TrackedAnchor from "@/components/TrackedAnchor";
+import {
+  getPublicContentValue,
+  normalizePhoneForWhatsapp,
+  publicContentFallbacks,
+  PublicSiteContent,
+  whatsappUrlFromPhone,
+} from "@/lib/site-content";
 
-export default function Hero() {
+type HeroProps = {
+  content?: PublicSiteContent;
+};
+
+export default function Hero({ content = {} }: HeroProps) {
+  const heroTitle = getPublicContentValue(
+    content,
+    "Inicio",
+    "Título principal",
+    publicContentFallbacks.heroTitle,
+  );
+  const heroDoctor = getPublicContentValue(
+    content,
+    "Inicio",
+    "Subtítulo doctora",
+    publicContentFallbacks.heroDoctor,
+  );
+  const heroDescription = getPublicContentValue(
+    content,
+    "Inicio",
+    "Descripción hero",
+    publicContentFallbacks.heroDescription,
+  );
+  const phoneLabel = getPublicContentValue(
+    content,
+    "Contacto",
+    "WhatsApp",
+    publicContentFallbacks.whatsapp,
+  );
+  const whatsappUrl = whatsappUrlFromPhone(phoneLabel);
+  const phoneNumber = normalizePhoneForWhatsapp(phoneLabel);
+
   return (
     <section id="inicio" className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
       <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
         <div className="flex flex-col">
           <div className="max-w-xl">
-            <LeadForm compact />
+            <LeadForm compact phoneNumber={phoneNumber} />
           </div>
 
           <div className="mt-8 lg:mt-10">
@@ -17,22 +55,20 @@ export default function Hero() {
             </span>
 
             <h1 className="mt-5 max-w-3xl text-4xl font-light leading-tight text-[#6b5b63] sm:text-5xl lg:text-6xl">
-              Medicina estética con resultados naturales
+              {heroTitle}
             </h1>
 
             <h2 className="mt-5 text-xl text-[#d9a8b5] sm:text-2xl">
-              Dra. Luciana Karki Martín
+              {heroDoctor}
             </h2>
 
             <p className="mt-7 max-w-2xl text-base leading-8 text-gray-600 sm:text-lg">
-              Tratamientos faciales y corporales diseñados con valoración
-              médica, criterio estético y una prioridad clara: realzar sin
-              transformar tu esencia.
+              {heroDescription}
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <TrackedAnchor
-                href="https://wa.me/34644241706"
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 eventName="whatsapp_click"

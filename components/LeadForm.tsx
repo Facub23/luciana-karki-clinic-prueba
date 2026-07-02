@@ -7,9 +7,10 @@ import { trackEvent } from "@/lib/analytics";
 type LeadFormProps = {
   treatmentName?: string;
   compact?: boolean;
+  phoneNumber?: string;
 };
 
-const phoneNumber = "34644241706";
+const defaultPhoneNumber = "34644241706";
 
 function getTrackingParams() {
   const params = new URLSearchParams(window.location.search);
@@ -28,6 +29,7 @@ function getTrackingParams() {
 export default function LeadForm({
   treatmentName,
   compact = false,
+  phoneNumber = defaultPhoneNumber,
 }: LeadFormProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");

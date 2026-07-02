@@ -1,10 +1,16 @@
 import { MessageCircle } from "lucide-react";
 import TrackedAnchor from "@/components/TrackedAnchor";
 
-export default function WhatsappButton() {
+type WhatsappButtonProps = {
+  whatsappUrl?: string;
+};
+
+export default function WhatsappButton({
+  whatsappUrl = "https://wa.me/34644241706",
+}: WhatsappButtonProps) {
   return (
     <TrackedAnchor
-      href="https://wa.me/34644241706"
+      href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Abrir WhatsApp"

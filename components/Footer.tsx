@@ -9,7 +9,15 @@ const treatmentColumns = [
   treatments.slice(8),
 ];
 
-export default function Footer() {
+type FooterProps = {
+  phoneLabel?: string;
+  whatsappUrl?: string;
+};
+
+export default function Footer({
+  phoneLabel = "+34 644 24 17 06",
+  whatsappUrl = "https://wa.me/34644241706",
+}: FooterProps) {
   return (
     <footer className="mt-24 bg-[#6b5b63] text-white">
       <div className="mx-auto max-w-7xl px-6 py-16">
@@ -37,7 +45,7 @@ export default function Footer() {
             </p>
 
             <div className="mt-6 space-y-2 text-white/80">
-              <p>+34 644 24 17 06</p>
+              <p>{phoneLabel}</p>
               <p>Calle Sepúlveda 125</p>
               <p>Barcelona · Alicante</p>
             </div>
@@ -53,7 +61,7 @@ export default function Footer() {
               </a>
 
               <TrackedAnchor
-                href="https://wa.me/34644241706"
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 eventName="whatsapp_click"

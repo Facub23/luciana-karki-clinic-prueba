@@ -3,7 +3,13 @@ import Image from "next/image";
 import Link from "next/link";
 import TrackedAnchor from "@/components/TrackedAnchor";
 
-export default function Navbar() {
+type NavbarProps = {
+  whatsappUrl?: string;
+};
+
+export default function Navbar({
+  whatsappUrl = "https://wa.me/34644241706",
+}: NavbarProps) {
   return (
     <header className="sticky top-0 z-50 border-b border-[#ead1d9]/80 bg-[#fffafc]/90 shadow-[0_10px_40px_rgba(107,91,99,0.08)] backdrop-blur-xl">
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-3 px-4 sm:h-24 sm:px-6">
@@ -59,7 +65,7 @@ export default function Navbar() {
         </nav>
 
         <TrackedAnchor
-          href="https://wa.me/34644241706"
+          href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
           eventName="whatsapp_click"

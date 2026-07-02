@@ -7,7 +7,13 @@ const principles = [
   "Atención en Barcelona y Alicante con cita previa",
 ];
 
-export default function About() {
+type AboutProps = {
+  whatsappUrl?: string;
+};
+
+export default function About({
+  whatsappUrl = "https://wa.me/34644241706",
+}: AboutProps) {
   return (
     <section id="sobre" className="bg-white py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-6">
@@ -49,7 +55,7 @@ export default function About() {
             </div>
 
             <TrackedAnchor
-              href="https://wa.me/34644241706"
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               eventName="whatsapp_click"

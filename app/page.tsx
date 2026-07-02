@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import About from "@/components/About";
 import BeforeAfter from "@/components/BeforeAfter";
 import BookingProcess from "@/components/BookingProcess";
@@ -12,22 +13,90 @@ import TreatmentsSection from "@/components/TreatmentsSection";
 import VideoSection from "@/components/VideoSection";
 import WhatsappButton from "@/components/WhatsappButton";
 import WhyChooseUs from "@/components/WhyChooseUs";
-import { clinicJsonLd, websiteJsonLd } from "@/lib/seo";
+import {
+  absoluteUrl,
+  clinicJsonLd,
+  clinicName,
+  homeKeywords,
+  siteUrl,
+  websiteJsonLd,
+} from "@/lib/seo";
+import {
+  getPublicContentValue,
+  getPublicSiteContent,
+  phoneLabelFromContent,
+  publicContentFallbacks,
+  whatsappUrlFromPhone,
+} from "@/lib/site-content";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const content = await getPublicSiteContent();
+  const title = getPublicContentValue(
+    content,
+    "SEO",
+    "Meta title",
+    publicContentFallbacks.seoTitle,
+  );
+  const description = getPublicContentValue(
+    content,
+    "SEO",
+    "Meta description",
+    publicContentFallbacks.seoDescription,
+  );
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title,
+    description,
+    keywords: homeKeywords,
+    alternates: {
+      canonical: absoluteUrl("/"),
+    },
+    openGraph: {
+      type: "website",
+      locale: "es_ES",
+      url: absoluteUrl("/"),
+      siteName: title,
+      title,
+      description,
+      images: [
+        {
+          url: absoluteUrl("/images/doctora.jpg"),
+          width: 1200,
+          height: 900,
+          alt: clinicName,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [absoluteUrl("/images/doctora.jpg")],
+    },
+  };
+}
+
+export default async function Home() {
+  const content = await getPublicSiteContent();
+  const phoneLabel = phoneLabelFromContent(content);
+  const whatsappUrl = whatsappUrlFromPhone(phoneLabel);
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-[#faf7f8] to-white">
       <JsonLd data={clinicJsonLd()} />
       <JsonLd data={websiteJsonLd()} />
-      <Navbar />
+      <Navbar whatsappUrl={whatsappUrl} />
 
-      <Hero />
+      <Hero content={content} />
 
       <Results />
 
       <WhyChooseUs />
 
-      <About />
+      <About whatsappUrl={whatsappUrl} />
 
       <VideoSection />
 
@@ -57,7 +126,7 @@ export default function Home() {
           <p className="text-gray-600">Calle Sepúlveda 125 · Barcelona</p>
           <p className="mt-2 text-gray-600">Alicante · Visitas a domicilio</p>
           <p className="mt-2 text-gray-600">Atención solo con cita previa</p>
-          <p className="mt-2 text-gray-600">+34 644 24 17 06</p>
+          <p className="mt-2 text-gray-600">{phoneLabel}</p>
 
           <div className="mt-8 grid gap-3 text-left sm:grid-cols-3">
             {[
@@ -83,9 +152,9 @@ export default function Home() {
         </div>
       </section>
 
-      <WhatsappButton />
+      <WhatsappButton whatsappUrl={whatsappUrl} />
 
-      <Footer />
+      <Footer phoneLabel={phoneLabel} whatsappUrl={whatsappUrl} />
     </main>
   );
 }

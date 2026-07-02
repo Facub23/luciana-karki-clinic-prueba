@@ -91,9 +91,9 @@ export default function AdminContentManager({
 
       <section className="mx-auto max-w-7xl px-5 py-6">
         <div className="rounded-lg border border-[#ead1d9] bg-white p-4 text-sm leading-6 text-gray-600 shadow-sm">
-          Esta sección deja preparada la edición de contenido desde el admin. Los
-          cambios quedan guardados en Supabase; el siguiente paso es conectar
-          cada bloque editable con la web pública.
+          Los cambios quedan guardados en Supabase y ya alimentan los bloques
+          principales de la web pública. Seguiremos conectando tratamientos,
+          promociones e imágenes por fases.
         </div>
 
         {message ? (
