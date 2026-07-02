@@ -5,6 +5,8 @@ import { useMemo, useState } from "react";
 import {
   CheckCircle2,
   Eye,
+  FileVideo,
+  FolderOpen,
   ImageIcon,
   LogOut,
   Plus,
@@ -15,6 +17,7 @@ import {
 } from "lucide-react";
 import AdminNav from "@/components/AdminNav";
 import { SiteContentRecord } from "@/lib/supabase-leads";
+import type { MediaAsset } from "@/lib/supabase-storage";
 
 type AdminContentManagerProps = {
   initialContent: SiteContentRecord[];
@@ -114,6 +117,20 @@ function parseJsonValue<T>(value: string, fallback: T) {
 
 function stringifyJsonValue(value: unknown) {
   return JSON.stringify(value, null, 2);
+}
+
+function mediaTypeFromAccept(accept: string) {
+  return accept.startsWith("image/")
+    ? "image"
+    : accept.startsWith("video/")
+      ? "video"
+      : "all";
+}
+
+function assetMatchesAccept(asset: MediaAsset, accept: string) {
+  const type = mediaTypeFromAccept(accept);
+
+  return type === "all" || asset.type === type;
 }
 
 export default function AdminContentManager({
@@ -589,6 +606,10 @@ export default function AdminContentManager({
                 accept="image/*"
                 onUploaded={(url) => updateField("image", url)}
               />
+              <MediaPickerButton
+                accept="image/*"
+                onSelect={(asset) => updateField("image", asset.url)}
+              />
             </div>
             <div
               className="flex min-h-28 items-center justify-center rounded-lg border border-[#ead1d9] bg-white bg-cover bg-center text-xs text-gray-400"
@@ -693,6 +714,10 @@ export default function AdminContentManager({
                     <UploadButton
                       accept="image/*"
                       onUploaded={(url) => updatePromotion(index, "src", url)}
+                    />
+                    <MediaPickerButton
+                      accept="image/*"
+                      onSelect={(asset) => updatePromotion(index, "src", asset.url)}
                     />
                   </div>
                 </AdminField>
@@ -1551,6 +1576,10 @@ function MediaListEditor({
                   accept={accept}
                   onUploaded={(url) => onChange(index, { ...item, src: url })}
                 />
+                <MediaPickerButton
+                  accept={accept}
+                  onSelect={(asset) => onChange(index, { ...item, src: asset.url })}
+                />
               </div>
             </AdminField>
 
@@ -1635,6 +1664,170 @@ function TextPairListEditor({
         ))}
       </div>
     </div>
+  );
+}
+
+function MediaPickerButton({
+  accept,
+  onSelect,
+}: {
+  accept: string;
+  onSelect: (asset: MediaAsset) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [assets, setAssets] = useState<MediaAsset[]>([]);
+  const [query, setQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const expectedType = mediaTypeFromAccept(accept);
+  const visibleAssets = assets.filter((asset) => {
+    const matchesType = assetMatchesAccept(asset, accept);
+    const normalizedQuery = query.trim().toLowerCase();
+    const matchesQuery =
+      !normalizedQuery ||
+      asset.name.toLowerCase().includes(normalizedQuery) ||
+      asset.path.toLowerCase().includes(normalizedQuery);
+
+    return matchesType && matchesQuery;
+  });
+
+  async function openLibrary() {
+    setIsOpen(true);
+
+    if (assets.length || isLoading) {
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/admin/media");
+      const payload = (await response.json()) as {
+        ok: boolean;
+        assets?: MediaAsset[];
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || "No se pudieron cargar medios");
+      }
+
+      setAssets(payload.assets ?? []);
+    } catch (loadError) {
+      setError(
+        loadError instanceof Error
+          ? loadError.message
+          : "No se pudieron cargar medios",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function selectAsset(asset: MediaAsset) {
+    onSelect(asset);
+    setIsOpen(false);
+    setQuery("");
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => void openLibrary()}
+        className="inline-flex items-center gap-2 rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-xs font-semibold text-[#6b5b63] transition hover:bg-[#fff3f6]"
+      >
+        <FolderOpen className="h-4 w-4" aria-hidden="true" />
+        Elegir de biblioteca
+      </button>
+
+      {isOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#2b2027]/45 px-4 py-6">
+          <div className="max-h-[88vh] w-full max-w-5xl overflow-hidden rounded-lg border border-[#ead1d9] bg-white shadow-2xl">
+            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#ead1d9] px-5 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#c98fa1]">
+                  Biblioteca
+                </p>
+                <h3 className="mt-1 text-lg font-semibold text-[#5f4d56]">
+                  Elegir {expectedType === "video" ? "video" : "imagen"}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-sm font-semibold text-[#6b5b63] transition hover:bg-[#fff3f6]"
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div className="border-b border-[#ead1d9] p-5">
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                className="admin-content-input"
+                placeholder="Buscar por nombre o ruta"
+              />
+              {error ? <p className="mt-3 text-sm text-red-700">{error}</p> : null}
+            </div>
+
+            <div className="max-h-[58vh] overflow-y-auto p-5">
+              {isLoading ? (
+                <div className="rounded-lg border border-dashed border-[#ead1d9] bg-[#fffafb] p-8 text-center text-sm text-gray-500">
+                  Cargando medios...
+                </div>
+              ) : null}
+
+              {!isLoading && visibleAssets.length ? (
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  {visibleAssets.map((asset) => (
+                    <button
+                      key={asset.path}
+                      type="button"
+                      onClick={() => selectAsset(asset)}
+                      className="overflow-hidden rounded-lg border border-[#ead1d9] bg-white text-left shadow-sm transition hover:border-[#c98fa1] hover:shadow-md"
+                    >
+                      <div className="flex aspect-video items-center justify-center bg-[#fffafb]">
+                        {asset.type === "image" ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={asset.url}
+                            alt={asset.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex flex-col items-center gap-2 text-[#6b5b63]">
+                            <FileVideo className="h-9 w-9" aria-hidden="true" />
+                            <span className="text-sm font-semibold">Video</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-3">
+                        <p className="truncate text-sm font-semibold text-[#5f4d56]">
+                          {asset.name}
+                        </p>
+                        <p className="mt-1 truncate text-xs text-gray-500">
+                          {asset.path}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+
+              {!isLoading && !visibleAssets.length ? (
+                <div className="rounded-lg border border-dashed border-[#ead1d9] bg-[#fffafb] p-8 text-center text-sm text-gray-500">
+                  No hay medios para este tipo. Puedes subir uno desde este mismo
+                  campo o desde la seccion Medios.
+                </div>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 
