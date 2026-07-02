@@ -59,6 +59,18 @@ export type SiteContentRecord = {
   draftValue?: string | null;
   draftUpdatedAt?: string | null;
   hasDraft?: boolean;
+  history?: SiteContentHistoryRecord[];
+};
+
+export type SiteContentHistoryRecord = {
+  id: string;
+  created_at: string;
+  updated_at: string;
+  contentId: string;
+  section: string;
+  label: string;
+  value: string;
+  publishedAt: string;
 };
 
 export type SiteContentDefaultInput = Pick<
@@ -256,6 +268,7 @@ export async function fetchSiteContent() {
     "site_content?select=*&order=section.asc,label.asc",
   );
   const draftPrefix = "__draft__:";
+  const historyPrefix = "__history__:";
   const draftsByKey = new Map(
     records
       .filter((record) => record.section.startsWith(draftPrefix))
@@ -264,9 +277,40 @@ export async function fetchSiteContent() {
         record,
       ]),
   );
+  const historiesByContentId = records
+    .filter((record) => record.section.startsWith(historyPrefix))
+    .reduce<Record<string, SiteContentHistoryRecord[]>>((acc, record) => {
+      const contentId = record.section.slice(historyPrefix.length);
+      const publishedAt = record.label.replace("Publicado ", "");
+
+      acc[contentId] = acc[contentId] || [];
+      acc[contentId].push({
+        id: record.id,
+        created_at: record.created_at,
+        updated_at: record.updated_at,
+        contentId,
+        section: record.section,
+        label: record.label,
+        value: record.value,
+        publishedAt,
+      });
+
+      return acc;
+    }, {});
+
+  for (const history of Object.values(historiesByContentId)) {
+    history.sort(
+      (left, right) =>
+        new Date(right.publishedAt).getTime() - new Date(left.publishedAt).getTime(),
+    );
+  }
 
   return records
-    .filter((record) => !record.section.startsWith(draftPrefix))
+    .filter(
+      (record) =>
+        !record.section.startsWith(draftPrefix) &&
+        !record.section.startsWith(historyPrefix),
+    )
     .map((record) => {
       const draft = draftsByKey.get(`${record.section}::${record.label}`);
 
@@ -275,6 +319,7 @@ export async function fetchSiteContent() {
         draftValue: draft?.value ?? null,
         draftUpdatedAt: draft?.updated_at ?? null,
         hasDraft: Boolean(draft),
+        history: historiesByContentId[record.id] ?? [],
       };
     });
 }
@@ -366,10 +411,69 @@ export async function publishSiteContentDraft(id: string) {
     throw new Error("No hay borrador para publicar");
   }
 
+  const history = await createSiteContentHistory(content);
   const [published] = await updateSiteContent(id, { value: draft.value });
   await discardSiteContentDraft(id);
 
-  return published;
+  return {
+    ...published,
+    history: [history, ...(content.history ?? [])],
+  };
+}
+
+export async function createSiteContentHistory(content: SiteContentRecord) {
+  const publishedAt = new Date().toISOString();
+
+  const [history] = await supabaseRequest<SiteContentRecord[]>(
+    "site_content?on_conflict=section,label&select=*",
+    {
+      method: "POST",
+      headers: {
+        Prefer: "resolution=merge-duplicates,return=representation",
+      },
+      body: JSON.stringify({
+        section: `__history__:${content.id}`,
+        label: `Publicado ${publishedAt}`,
+        content_type: content.content_type,
+        value: content.value,
+        description: `Version anterior de ${content.section} / ${content.label}`,
+      }),
+    },
+  );
+
+  return {
+    id: history.id,
+    created_at: history.created_at,
+    updated_at: history.updated_at,
+    contentId: content.id,
+    section: history.section,
+    label: history.label,
+    value: history.value,
+    publishedAt,
+  };
+}
+
+export async function restoreSiteContentHistoryAsDraft(
+  id: string,
+  historyId: string,
+) {
+  const [content] = await supabaseRequest<SiteContentRecord[]>(
+    `site_content?id=eq.${encodeURIComponent(id)}&select=*&limit=1`,
+  );
+
+  if (!content) {
+    throw new Error("Contenido no encontrado");
+  }
+
+  const [history] = await supabaseRequest<SiteContentRecord[]>(
+    `site_content?id=eq.${encodeURIComponent(historyId)}&section=eq.${encodeURIComponent(`__history__:${id}`)}&select=*&limit=1`,
+  );
+
+  if (!history) {
+    throw new Error("Version no encontrada");
+  }
+
+  return saveSiteContentDraft(id, { value: history.value });
 }
 
 export async function discardSiteContentDraft(id: string) {
@@ -442,4 +546,13 @@ export async function updateReservation(
       body: JSON.stringify(payload),
     },
   );
+}
+
+export async function deleteReservation(id: string) {
+  await supabaseRequest<null>(`reservations?id=eq.${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: {
+      Prefer: "return=minimal",
+    },
+  });
 }

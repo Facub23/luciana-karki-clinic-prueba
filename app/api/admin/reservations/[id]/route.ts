@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isAdminAuthenticated } from "@/lib/admin-auth";
-import { updateReservation } from "@/lib/supabase-leads";
+import { deleteReservation, updateReservation } from "@/lib/supabase-leads";
 
 const updateReservationSchema = z.object({
   status: z
@@ -34,4 +34,18 @@ export async function PATCH(
     ok: true,
     reservation,
   });
+}
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!(await isAdminAuthenticated())) {
+    return Response.json({ ok: false, error: "No autorizado" }, { status: 401 });
+  }
+
+  const { id } = await params;
+  await deleteReservation(id);
+
+  return Response.json({ ok: true });
 }

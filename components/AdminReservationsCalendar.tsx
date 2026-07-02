@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CalendarPlus, LogOut, Save } from "lucide-react";
+import { CalendarPlus, LogOut, Save, Trash2 } from "lucide-react";
 import AdminNav from "@/components/AdminNav";
 import {
   LeadRecord,
@@ -127,6 +127,43 @@ export default function AdminReservationsCalendar({
       setMessage("Reserva creada.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "No se pudo crear");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function deleteReservation(id: string) {
+    const reservation = reservations.find((item) => item.id === id);
+    const confirmed = window.confirm(
+      `Eliminar la reserva de ${reservation?.patient_name ?? "este paciente"}?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      const response = await fetch(`/api/admin/reservations/${id}`, {
+        method: "DELETE",
+      });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok) {
+        throw new Error(payload.error || "No se pudo eliminar la reserva");
+      }
+
+      setReservations((current) =>
+        current.filter((reservation) => reservation.id !== id),
+      );
+      setMessage("Reserva eliminada.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No se pudo eliminar");
     } finally {
       setIsSaving(false);
     }
@@ -263,6 +300,15 @@ export default function AdminReservationsCalendar({
                     <p className="mt-1 text-xs text-gray-500">
                       {reservationStatusLabels[reservation.status]}
                     </p>
+                    <button
+                      type="button"
+                      disabled={isSaving}
+                      onClick={() => void deleteReservation(reservation.id)}
+                      className="mt-3 inline-flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-wait disabled:opacity-60"
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                      Eliminar reserva
+                    </button>
                   </div>
                 ))
               )}

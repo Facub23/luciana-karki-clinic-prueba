@@ -7,16 +7,21 @@ import {
   Eye,
   FileVideo,
   FolderOpen,
+  History,
   ImageIcon,
   LogOut,
   Plus,
+  RotateCcw,
   Save,
   Trash2,
   Upload,
   XCircle,
 } from "lucide-react";
 import AdminNav from "@/components/AdminNav";
-import { SiteContentRecord } from "@/lib/supabase-leads";
+import {
+  SiteContentHistoryRecord,
+  SiteContentRecord,
+} from "@/lib/supabase-leads";
 import type { MediaAsset } from "@/lib/supabase-storage";
 
 type AdminContentManagerProps = {
@@ -251,6 +256,7 @@ export default function AdminContentManager({
                 draftValue: null,
                 hasDraft: false,
                 draftUpdatedAt: null,
+                history: payload.content?.history ?? currentItem.history,
               }
             : currentItem,
         ),
@@ -304,6 +310,49 @@ export default function AdminContentManager({
       setMessage("Borrador descartado.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "No se pudo descartar");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  async function restoreHistory(id: string, history: SiteContentHistoryRecord) {
+    setSavingId(id);
+    setMessage("");
+
+    try {
+      const response = await fetch(`/api/admin/content/${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ action: "restore", historyId: history.id }),
+      });
+      const payload = (await response.json()) as {
+        ok: boolean;
+        content?: SiteContentRecord;
+        error?: string;
+      };
+
+      if (!response.ok || !payload.ok || !payload.content) {
+        throw new Error(payload.error || "No se pudo restaurar la version");
+      }
+
+      setItems((current) =>
+        current.map((currentItem) =>
+          currentItem.id === id
+            ? {
+                ...currentItem,
+                value: payload.content!.value,
+                draftValue: payload.content!.value,
+                hasDraft: true,
+                draftUpdatedAt: new Date().toISOString(),
+              }
+            : currentItem,
+        ),
+      );
+      setMessage("Version restaurada como borrador. Publica para aplicarla.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "No se pudo restaurar");
     } finally {
       setSavingId(null);
     }
@@ -466,6 +515,57 @@ export default function AdminContentManager({
           {renderPreviewPanel("Publicado ahora", item.publishedValue, item, "published")}
           {renderPreviewPanel(draftTitle, item.value, item, "draft")}
         </div>
+      </div>
+    );
+  }
+
+  function renderContentHistory(item: AdminContentItem) {
+    const history = item.history ?? [];
+
+    return (
+      <div className="mt-4 rounded-lg border border-[#ead1d9] bg-white p-4">
+        <div className="flex items-center gap-2">
+          <History className="h-4 w-4 text-[#c98fa1]" aria-hidden="true" />
+          <p className="text-sm font-semibold text-[#5f4d56]">
+            Historial de publicaciones
+          </p>
+        </div>
+
+        {history.length ? (
+          <div className="mt-3 space-y-2">
+            {history.slice(0, 5).map((version) => (
+              <div
+                key={version.id}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-[#fffafb] px-3 py-2"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-[#5f4d56]">
+                    {new Date(version.publishedAt).toLocaleString("es-ES", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    Version anterior guardada antes de publicar.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  disabled={savingId === item.id}
+                  onClick={() => void restoreHistory(item.id, version)}
+                  className="inline-flex items-center gap-2 rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-xs font-semibold text-[#6b5b63] transition hover:bg-[#fff3f6] disabled:cursor-wait disabled:opacity-60"
+                >
+                  <RotateCcw className="h-4 w-4" aria-hidden="true" />
+                  Restaurar como borrador
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-3 rounded-lg border border-dashed border-[#ead1d9] bg-[#fffafb] px-3 py-3 text-sm text-gray-500">
+            Todavia no hay publicaciones anteriores para este bloque.
+          </p>
+        )}
       </div>
     );
   }
@@ -1372,6 +1472,8 @@ export default function AdminContentManager({
                     </div>
 
                     {previewOpenIds.has(item.id) ? renderContentPreview(item) : null}
+
+                    {renderContentHistory(item)}
 
                     <div className="mt-4 flex flex-wrap gap-2">
                       <button

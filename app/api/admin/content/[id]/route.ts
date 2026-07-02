@@ -3,6 +3,7 @@ import { isAdminAuthenticated } from "@/lib/admin-auth";
 import {
   discardSiteContentDraft,
   publishSiteContentDraft,
+  restoreSiteContentHistoryAsDraft,
   saveSiteContentDraft,
 } from "@/lib/supabase-leads";
 
@@ -38,7 +39,8 @@ export async function PATCH(
 }
 
 const actionSchema = z.object({
-  action: z.enum(["publish", "discard"]),
+  action: z.enum(["publish", "discard", "restore"]),
+  historyId: z.string().uuid().optional(),
 });
 
 export async function POST(
@@ -62,6 +64,22 @@ export async function POST(
 
   if (parsedBody.data.action === "publish") {
     const content = await publishSiteContentDraft(id);
+
+    return Response.json({ ok: true, content });
+  }
+
+  if (parsedBody.data.action === "restore") {
+    if (!parsedBody.data.historyId) {
+      return Response.json(
+        { ok: false, error: "Version requerida" },
+        { status: 400 },
+      );
+    }
+
+    const [content] = await restoreSiteContentHistoryAsDraft(
+      id,
+      parsedBody.data.historyId,
+    );
 
     return Response.json({ ok: true, content });
   }

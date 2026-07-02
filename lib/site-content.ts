@@ -90,10 +90,12 @@ export async function getPublicSiteContent(): Promise<PublicSiteContent> {
 
     const records = (await response.json()) as PublicSiteContentRecord[];
 
-    return records.reduce<PublicSiteContent>((acc, record) => {
-      acc[contentKey(record.section, record.label)] = record.value;
-      return acc;
-    }, {});
+    return records
+      .filter((record) => !record.section.startsWith("__"))
+      .reduce<PublicSiteContent>((acc, record) => {
+        acc[contentKey(record.section, record.label)] = record.value;
+        return acc;
+      }, {});
   } catch (error) {
     console.error("Public site content fetch failed", error);
     return {};
