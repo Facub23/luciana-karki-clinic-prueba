@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   CalendarDays,
   CalendarPlus,
@@ -58,6 +58,23 @@ function sortReservations(left: ReservationRecord, right: ReservationRecord) {
   return new Date(left.starts_at).getTime() - new Date(right.starts_at).getTime();
 }
 
+function isActiveAppointmentStatus(status: ReservationRecord["status"]) {
+  return status === "scheduled" || status === "confirmed";
+}
+
+function getReservationDisplayStatus(
+  reservation: ReservationRecord,
+  currentTimestamp: number,
+) {
+  const startsAt = new Date(reservation.starts_at).getTime();
+
+  if (isActiveAppointmentStatus(reservation.status) && startsAt < currentTimestamp) {
+    return "completed";
+  }
+
+  return reservation.status;
+}
+
 export default function AdminReservationsCalendar({
   initialReservations,
 }: AdminReservationsCalendarProps) {
@@ -74,7 +91,7 @@ export default function AdminReservationsCalendar({
   const [time, setTime] = useState("10:00");
   const [notes, setNotes] = useState("");
   const [filter, setFilter] = useState<ReservationFilter>("all");
-  const [filterNow] = useState(() => Date.now());
+  const [currentTimestamp, setCurrentTimestamp] = useState(() => Date.now());
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPatientName, setEditPatientName] = useState("");
   const [editPhone, setEditPhone] = useState("");
@@ -85,16 +102,24 @@ export default function AdminReservationsCalendar({
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setCurrentTimestamp(Date.now());
+    }, 60000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
   const monthDays = useMemo(() => buildMonthDays(currentMonth), [currentMonth]);
   const filteredReservations = useMemo(() => {
     return reservations.filter((reservation) => {
       const startsAt = new Date(reservation.starts_at).getTime();
 
-      if (filter === "upcoming") return startsAt >= filterNow;
-      if (filter === "past") return startsAt < filterNow;
+      if (filter === "upcoming") return startsAt >= currentTimestamp;
+      if (filter === "past") return startsAt < currentTimestamp;
       return true;
     });
-  }, [filter, filterNow, reservations]);
+  }, [currentTimestamp, filter, reservations]);
   const selectedReservations = filteredReservations
     .filter((reservation) => sameDay(new Date(reservation.starts_at), selectedDate))
     .sort(sortReservations);
@@ -102,10 +127,9 @@ export default function AdminReservationsCalendar({
     return reservations.reduce(
       (acc, reservation) => {
         const startsAt = new Date(reservation.starts_at).getTime();
-        const isActiveAppointment =
-          reservation.status === "scheduled" || reservation.status === "confirmed";
+        const isActiveAppointment = isActiveAppointmentStatus(reservation.status);
 
-        if (isActiveAppointment && startsAt >= filterNow) {
+        if (isActiveAppointment && startsAt >= currentTimestamp) {
           acc.pending += 1;
         }
 
@@ -113,7 +137,10 @@ export default function AdminReservationsCalendar({
           acc.scheduled += 1;
         }
 
-        if (reservation.status === "completed") {
+        if (
+          reservation.status === "completed" ||
+          (isActiveAppointment && startsAt < currentTimestamp)
+        ) {
           acc.finished += 1;
         }
 
@@ -121,7 +148,7 @@ export default function AdminReservationsCalendar({
       },
       { pending: 0, scheduled: 0, finished: 0 },
     );
-  }, [filterNow, reservations]);
+  }, [currentTimestamp, reservations]);
 
   function previousMonth() {
     setCurrentMonth(
@@ -389,7 +416,7 @@ export default function AdminReservationsCalendar({
                 {reservationMetrics.finished}
               </p>
               <p className="mt-1 text-xs text-gray-500">
-                Marcadas como completadas
+                Pasadas o completadas
               </p>
             </div>
           </div>
@@ -590,7 +617,14 @@ export default function AdminReservationsCalendar({
                               </p>
                             ) : null}
                             <p className="mt-2 text-xs text-gray-400">
-                              {reservationStatusLabels[reservation.status]}
+                              {
+                                reservationStatusLabels[
+                                  getReservationDisplayStatus(
+                                    reservation,
+                                    currentTimestamp,
+                                  )
+                                ]
+                              }
                             </p>
                           </div>
                         </div>

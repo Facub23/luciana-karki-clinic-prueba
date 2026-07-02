@@ -127,6 +127,8 @@ export const reservationStatusLabels: Record<ReservationStatus, string> = {
   no_show: "No asistió",
 };
 
+const activeReservationStatuses: ReservationStatus[] = ["scheduled", "confirmed"];
+
 function getSupabaseConfig() {
   const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -497,8 +499,25 @@ export async function discardSiteContentDraft(id: string) {
 }
 
 export async function fetchReservations() {
+  await completeExpiredReservations();
+
   return supabaseRequest<ReservationRecord[]>(
     "reservations?select=*&order=starts_at.asc&limit=1000",
+  );
+}
+
+export async function completeExpiredReservations(now = new Date()) {
+  await supabaseRequest<null>(
+    `reservations?status=in.(${activeReservationStatuses.join(",")})&starts_at=lt.${encodeURIComponent(now.toISOString())}`,
+    {
+      method: "PATCH",
+      headers: {
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({
+        status: "completed",
+      }),
+    },
   );
 }
 
