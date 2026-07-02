@@ -1,23 +1,31 @@
 import Image from "next/image";
 import TrackedAnchor from "@/components/TrackedAnchor";
 import TrackedLink from "@/components/TrackedLink";
-import { treatments } from "@/lib/treatments";
-
-const treatmentColumns = [
-  treatments.slice(0, 4),
-  treatments.slice(4, 8),
-  treatments.slice(8),
-];
+import {
+  defaultFooterContent,
+  type FooterContent,
+} from "@/lib/public-site-settings";
+import { treatments as defaultTreatments, type Treatment } from "@/lib/treatments";
 
 type FooterProps = {
   phoneLabel?: string;
   whatsappUrl?: string;
+  content?: FooterContent;
+  treatments?: Treatment[];
 };
 
 export default function Footer({
   phoneLabel = "+34 644 24 17 06",
   whatsappUrl = "https://wa.me/34644241706",
+  content = defaultFooterContent,
+  treatments = defaultTreatments,
 }: FooterProps) {
+  const treatmentColumns = [
+    treatments.slice(0, 4),
+    treatments.slice(4, 8),
+    treatments.slice(8),
+  ];
+
   return (
     <footer className="mt-24 bg-[#6b5b63] text-white">
       <div className="mx-auto max-w-7xl px-6 py-16">
@@ -35,24 +43,20 @@ export default function Footer({
               </span>
             </div>
 
-            <h3 className="mt-5 text-xl font-semibold">
-              Dra. Luciana Karki Martín
-            </h3>
+            <h3 className="mt-5 text-xl font-semibold">{content.brandName}</h3>
 
-            <p className="mt-4 max-w-sm text-white/80">
-              Medicina estética avanzada en Barcelona y Alicante, con valoración
-              médica y planes personalizados.
-            </p>
+            <p className="mt-4 max-w-sm text-white/80">{content.description}</p>
 
             <div className="mt-6 space-y-2 text-white/80">
               <p>{phoneLabel}</p>
-              <p>Calle Sepúlveda 125</p>
-              <p>Barcelona · Alicante</p>
+              {content.addressLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
             </div>
 
             <div className="mt-6 flex flex-wrap gap-4">
               <a
-                href="https://www.instagram.com/dra.lucianakarkimartin/"
+                href={content.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-white/80 underline-offset-4 hover:text-white hover:underline"
@@ -101,8 +105,34 @@ export default function Footer({
           </div>
         </div>
 
-        <div className="mt-12 border-t border-white/20 pt-8 text-center text-white/60">
-          © 2026 Dra. Luciana Karki Martín · Todos los derechos reservados
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/20 pt-8 text-center text-white/60 lg:flex-row lg:items-center lg:justify-between lg:text-left">
+          <p>{content.copyright}</p>
+          <div className="flex flex-wrap justify-center gap-4 text-sm lg:justify-end">
+            <TrackedLink
+              href="/cookies"
+              eventName="footer_legal_click"
+              eventPayload={{ location: "footer", page: "cookies" }}
+              className="underline-offset-4 hover:text-white hover:underline"
+            >
+              Aviso de cookies
+            </TrackedLink>
+            <TrackedLink
+              href="/politica-privacidad"
+              eventName="footer_legal_click"
+              eventPayload={{ location: "footer", page: "privacy" }}
+              className="underline-offset-4 hover:text-white hover:underline"
+            >
+              Política de privacidad
+            </TrackedLink>
+            <TrackedLink
+              href="/aviso-legal"
+              eventName="footer_legal_click"
+              eventPayload={{ location: "footer", page: "legal" }}
+              className="underline-offset-4 hover:text-white hover:underline"
+            >
+              Aviso legal
+            </TrackedLink>
+          </div>
         </div>
       </div>
     </footer>

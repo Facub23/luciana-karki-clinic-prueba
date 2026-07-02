@@ -1,7 +1,8 @@
 export type AnalyticsEventName =
   | "lead_form_submit"
   | "whatsapp_click"
-  | "treatment_interest";
+  | "treatment_interest"
+  | "footer_legal_click";
 
 type AnalyticsPayload = Record<string, string | number | boolean | null>;
 

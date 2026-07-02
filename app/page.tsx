@@ -31,6 +31,7 @@ import {
 import { getEditableTreatments } from "@/lib/public-treatments";
 import { getEditablePromotions } from "@/lib/public-promotions";
 import { getEditableHomeContent } from "@/lib/public-home-content";
+import { getEditableSiteSettings } from "@/lib/public-site-settings";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +90,7 @@ export default async function Home() {
   const editableTreatments = getEditableTreatments(content);
   const editablePromotions = getEditablePromotions(content);
   const editableHomeContent = getEditableHomeContent(content);
+  const siteSettings = getEditableSiteSettings(content);
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-[#faf7f8] to-white">
@@ -122,24 +124,25 @@ export default async function Home() {
       >
         <div className="mx-auto max-w-4xl text-center">
           <span className="uppercase tracking-[0.3em] text-[#d9a8b5] text-sm">
-            Contacto
+            {siteSettings.contact.eyebrow}
           </span>
 
           <h2 className="mt-4 text-4xl text-[#6b5b63] mb-6">
-            Agenda una valoración
+            {siteSettings.contact.title}
           </h2>
 
-          <p className="text-gray-600">Calle Sepúlveda 125 · Barcelona</p>
-          <p className="mt-2 text-gray-600">Alicante · Visitas a domicilio</p>
-          <p className="mt-2 text-gray-600">Atención solo con cita previa</p>
+          {siteSettings.contact.lines.map((line, index) => (
+            <p
+              key={line}
+              className={index === 0 ? "text-gray-600" : "mt-2 text-gray-600"}
+            >
+              {line}
+            </p>
+          ))}
           <p className="mt-2 text-gray-600">{phoneLabel}</p>
 
           <div className="mt-8 grid gap-3 text-left sm:grid-cols-3">
-            {[
-              "Te respondemos por WhatsApp",
-              "Revisamos el tratamiento que te interesa",
-              "Coordinamos disponibilidad y valoración",
-            ].map((item) => (
+            {siteSettings.contact.cards.map((item) => (
               <div
                 key={item}
                 className="rounded-2xl border border-pink-100 bg-white p-4 text-sm text-[#6b5b63]"
@@ -153,14 +156,19 @@ export default async function Home() {
             href="#inicio"
             className="mt-10 inline-flex rounded-full bg-[#d9a8b5] px-8 py-4 font-medium text-white transition hover:opacity-90"
           >
-            Completar formulario
+            {siteSettings.contact.ctaLabel}
           </a>
         </div>
       </section>
 
       <WhatsappButton whatsappUrl={whatsappUrl} />
 
-      <Footer phoneLabel={phoneLabel} whatsappUrl={whatsappUrl} />
+      <Footer
+        phoneLabel={phoneLabel}
+        whatsappUrl={whatsappUrl}
+        content={siteSettings.footer}
+        treatments={editableTreatments}
+      />
     </main>
   );
 }

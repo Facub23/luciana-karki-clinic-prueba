@@ -25,7 +25,12 @@ import {
 } from "@/lib/seo";
 import {
   getEditableTreatmentBySlug,
+  getEditableTreatments,
 } from "@/lib/public-treatments";
+import {
+  applyTreatmentTemplate,
+  getEditableSiteSettings,
+} from "@/lib/public-site-settings";
 import {
   getPublicSiteContent,
   normalizePhoneForWhatsapp,
@@ -147,6 +152,16 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
   const phoneLabel = phoneLabelFromContent(content);
   const whatsappUrl = whatsappUrlFromPhone(phoneLabel);
   const phoneNumber = normalizePhoneForWhatsapp(phoneLabel);
+  const siteSettings = getEditableSiteSettings(content);
+  const editableTreatments = getEditableTreatments(content);
+  const treatmentFaqContent = {
+    ...siteSettings.treatmentFaq,
+    title: applyTreatmentTemplate(siteSettings.treatmentFaq.title, treatment.name),
+    items: siteSettings.treatmentFaq.items.map((item) => ({
+      question: applyTreatmentTemplate(item.question, treatment.name),
+      answer: applyTreatmentTemplate(item.answer, treatment.name),
+    })),
+  };
   const pageDetails = getPageDetails(treatment);
   const detailItems = [
     { label: "Duración", value: pageDetails.duration, icon: Timer },
@@ -346,29 +361,15 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
 
       <BookingProcess />
 
-      <FaqSection
-        title={`Dudas sobre ${treatment.name}`}
-        items={[
-          {
-            question: `¿Cómo sé si ${treatment.name} es para mí?`,
-            answer:
-              "La indicación se confirma en valoración, revisando tus objetivos, anatomía y antecedentes relevantes.",
-          },
-          {
-            question: "¿Puedo preguntar antes de reservar?",
-            answer:
-              "Sí. El formulario abre WhatsApp con tus datos y el tratamiento de interés para resolver dudas y coordinar la cita.",
-          },
-          {
-            question: "¿El resultado busca verse natural?",
-            answer:
-              "Sí. El enfoque prioriza proporción, armonía y un resultado coherente con tus rasgos.",
-          },
-        ]}
-      />
+      <FaqSection content={treatmentFaqContent} />
 
       <WhatsappButton whatsappUrl={whatsappUrl} />
-      <Footer phoneLabel={phoneLabel} whatsappUrl={whatsappUrl} />
+      <Footer
+        phoneLabel={phoneLabel}
+        whatsappUrl={whatsappUrl}
+        content={siteSettings.footer}
+        treatments={editableTreatments}
+      />
     </main>
   );
 }

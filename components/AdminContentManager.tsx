@@ -56,6 +56,27 @@ type EditableStructuredBlock = {
   }[];
 };
 
+type EditableFooterContent = {
+  brandName?: string;
+  description?: string;
+  addressLines?: string[];
+  instagramUrl?: string;
+  copyright?: string;
+};
+
+type EditableContactContent = {
+  eyebrow?: string;
+  title?: string;
+  lines?: string[];
+  cards?: string[];
+  ctaLabel?: string;
+};
+
+type EditableLegalContent = {
+  title?: string;
+  body?: string;
+};
+
 const treatmentDetailFields = [
   ["duration", "Duración"],
   ["technique", "Técnica"],
@@ -696,6 +717,193 @@ export default function AdminContentManager({
     );
   }
 
+  function renderFooterEditor(item: SiteContentRecord) {
+    const footer = parseJsonValue<EditableFooterContent>(item.value, {});
+
+    function updateFooter(nextValue: EditableFooterContent) {
+      updateDraft(item.id, stringifyJsonValue(nextValue));
+    }
+
+    function updateField(field: keyof EditableFooterContent, value: string) {
+      updateFooter({ ...footer, [field]: value });
+    }
+
+    function updateAddressLine(index: number, value: string) {
+      const addressLines = [...(footer.addressLines ?? [])];
+      addressLines[index] = value;
+      updateFooter({ ...footer, addressLines });
+    }
+
+    return (
+      <div className="mt-4 space-y-5">
+        <div className="grid gap-4 md:grid-cols-2">
+          <AdminField label="Nombre / marca">
+            <input
+              value={footer.brandName ?? ""}
+              onChange={(event) => updateField("brandName", event.target.value)}
+              className="admin-content-input"
+            />
+          </AdminField>
+
+          <AdminField label="Instagram">
+            <input
+              value={footer.instagramUrl ?? ""}
+              onChange={(event) =>
+                updateField("instagramUrl", event.target.value)
+              }
+              className="admin-content-input"
+            />
+          </AdminField>
+        </div>
+
+        <AdminField label="Descripción">
+          <textarea
+            value={footer.description ?? ""}
+            onChange={(event) => updateField("description", event.target.value)}
+            className="admin-content-textarea min-h-24"
+          />
+        </AdminField>
+
+        <EditableList
+          title="Dirección / líneas de contacto"
+          items={footer.addressLines ?? []}
+          onAdd={() =>
+            updateFooter({
+              ...footer,
+              addressLines: [...(footer.addressLines ?? []), ""],
+            })
+          }
+          onChange={updateAddressLine}
+          onRemove={(index) =>
+            updateFooter({
+              ...footer,
+              addressLines: (footer.addressLines ?? []).filter(
+                (_, itemIndex) => itemIndex !== index,
+              ),
+            })
+          }
+        />
+
+        <AdminField label="Copyright">
+          <input
+            value={footer.copyright ?? ""}
+            onChange={(event) => updateField("copyright", event.target.value)}
+            className="admin-content-input"
+          />
+        </AdminField>
+      </div>
+    );
+  }
+
+  function renderContactEditor(item: SiteContentRecord) {
+    const contact = parseJsonValue<EditableContactContent>(item.value, {});
+
+    function updateContact(nextValue: EditableContactContent) {
+      updateDraft(item.id, stringifyJsonValue(nextValue));
+    }
+
+    function updateField(field: keyof EditableContactContent, value: string) {
+      updateContact({ ...contact, [field]: value });
+    }
+
+    function updateList(field: "lines" | "cards", index: number, value: string) {
+      const list = [...(contact[field] ?? [])];
+      list[index] = value;
+      updateContact({ ...contact, [field]: list });
+    }
+
+    function removeListItem(field: "lines" | "cards", index: number) {
+      updateContact({
+        ...contact,
+        [field]: (contact[field] ?? []).filter(
+          (_, itemIndex) => itemIndex !== index,
+        ),
+      });
+    }
+
+    return (
+      <div className="mt-4 space-y-5">
+        <div className="grid gap-4 md:grid-cols-2">
+          <AdminField label="Etiqueta superior">
+            <input
+              value={contact.eyebrow ?? ""}
+              onChange={(event) => updateField("eyebrow", event.target.value)}
+              className="admin-content-input"
+            />
+          </AdminField>
+
+          <AdminField label="Título">
+            <input
+              value={contact.title ?? ""}
+              onChange={(event) => updateField("title", event.target.value)}
+              className="admin-content-input"
+            />
+          </AdminField>
+        </div>
+
+        <EditableList
+          title="Líneas de contacto"
+          items={contact.lines ?? []}
+          onAdd={() =>
+            updateContact({ ...contact, lines: [...(contact.lines ?? []), ""] })
+          }
+          onChange={(index, value) => updateList("lines", index, value)}
+          onRemove={(index) => removeListItem("lines", index)}
+        />
+
+        <EditableList
+          title="Tarjetas informativas"
+          items={contact.cards ?? []}
+          onAdd={() =>
+            updateContact({ ...contact, cards: [...(contact.cards ?? []), ""] })
+          }
+          onChange={(index, value) => updateList("cards", index, value)}
+          onRemove={(index) => removeListItem("cards", index)}
+        />
+
+        <AdminField label="Texto del botón">
+          <input
+            value={contact.ctaLabel ?? ""}
+            onChange={(event) => updateField("ctaLabel", event.target.value)}
+            className="admin-content-input"
+          />
+        </AdminField>
+      </div>
+    );
+  }
+
+  function renderLegalEditor(item: SiteContentRecord) {
+    const legal = parseJsonValue<EditableLegalContent>(item.value, {});
+
+    function updateLegal(nextValue: EditableLegalContent) {
+      updateDraft(item.id, stringifyJsonValue(nextValue));
+    }
+
+    return (
+      <div className="mt-4 space-y-5">
+        <AdminField label="Título">
+          <input
+            value={legal.title ?? ""}
+            onChange={(event) =>
+              updateLegal({ ...legal, title: event.target.value })
+            }
+            className="admin-content-input"
+          />
+        </AdminField>
+
+        <AdminField label="Contenido">
+          <textarea
+            value={legal.body ?? ""}
+            onChange={(event) =>
+              updateLegal({ ...legal, body: event.target.value })
+            }
+            className="admin-content-textarea min-h-80"
+          />
+        </AdminField>
+      </div>
+    );
+  }
+
   function renderContentEditor(item: SiteContentRecord) {
     if (item.section === "Tratamientos" && item.content_type === "json") {
       return renderTreatmentEditor(item);
@@ -710,6 +918,22 @@ export default function AdminContentManager({
       item.content_type === "json"
     ) {
       return renderStructuredBlockEditor(item);
+    }
+
+    if (item.section === "Footer" && item.content_type === "json") {
+      return renderFooterEditor(item);
+    }
+
+    if (
+      item.section === "Contacto" &&
+      item.label === "Bloque contacto" &&
+      item.content_type === "json"
+    ) {
+      return renderContactEditor(item);
+    }
+
+    if (item.section === "Legales" && item.content_type === "json") {
+      return renderLegalEditor(item);
     }
 
     return renderTextEditor(item);
