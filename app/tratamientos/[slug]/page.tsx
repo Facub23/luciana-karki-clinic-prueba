@@ -19,7 +19,10 @@ import TrustSignals from "@/components/TrustSignals";
 import WhatsappButton from "@/components/WhatsappButton";
 import {
   absoluteUrl,
+  breadcrumbJsonLd,
   clinicName,
+  faqJsonLd,
+  treatmentPageJsonLd,
   treatmentJsonLd,
   treatmentKeywords,
 } from "@/lib/seo";
@@ -136,6 +139,13 @@ export async function generateMetadata({
     robots: {
       index: true,
       follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
     },
   };
 }
@@ -180,6 +190,18 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-[#faf7f8] to-white">
       <JsonLd data={treatmentJsonLd(treatment)} />
+      <JsonLd data={treatmentPageJsonLd(treatment)} />
+      <JsonLd data={faqJsonLd(treatmentFaqContent.items)} />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Inicio", url: absoluteUrl("/") },
+          { name: "Tratamientos", url: absoluteUrl("/#tratamientos") },
+          {
+            name: treatment.name,
+            url: absoluteUrl(`/tratamientos/${treatment.slug}`),
+          },
+        ])}
+      />
       <Navbar whatsappUrl={whatsappUrl} />
 
       <section className="max-w-7xl mx-auto grid gap-12 px-6 py-20 lg:grid-cols-[1fr_420px] lg:items-start">

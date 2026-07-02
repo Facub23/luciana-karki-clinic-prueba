@@ -17,6 +17,9 @@ import {
   absoluteUrl,
   clinicJsonLd,
   clinicName,
+  defaultSeoImage,
+  faqJsonLd,
+  homePageJsonLd,
   homeKeywords,
   siteUrl,
   websiteJsonLd,
@@ -67,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       images: [
         {
-          url: absoluteUrl("/images/doctora.jpg"),
+          url: absoluteUrl(defaultSeoImage),
           width: 1200,
           height: 900,
           alt: clinicName,
@@ -78,7 +81,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [absoluteUrl("/images/doctora.jpg")],
+      images: [absoluteUrl(defaultSeoImage)],
     },
   };
 }
@@ -91,11 +94,25 @@ export default async function Home() {
   const editablePromotions = getEditablePromotions(content);
   const editableHomeContent = getEditableHomeContent(content);
   const siteSettings = getEditableSiteSettings(content);
+  const title = getPublicContentValue(
+    content,
+    "SEO",
+    "Meta title",
+    publicContentFallbacks.seoTitle,
+  );
+  const description = getPublicContentValue(
+    content,
+    "SEO",
+    "Meta description",
+    publicContentFallbacks.seoDescription,
+  );
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-[#faf7f8] to-white">
       <JsonLd data={clinicJsonLd()} />
       <JsonLd data={websiteJsonLd()} />
+      <JsonLd data={homePageJsonLd(title, description)} />
+      <JsonLd data={faqJsonLd(editableHomeContent.faq.items)} />
       <Navbar whatsappUrl={whatsappUrl} />
 
       <Hero content={content} />

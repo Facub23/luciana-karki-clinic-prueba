@@ -6,6 +6,7 @@ import {
   clinicDescription,
   clinicName,
   clinicTitle,
+  defaultSeoImage,
   homeKeywords,
   instagramUrl,
   siteUrl,
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
     description: clinicDescription,
     images: [
       {
-        url: absoluteUrl("/images/doctora.jpg"),
+        url: absoluteUrl(defaultSeoImage),
         width: 1200,
         height: 900,
         alt: clinicName,
@@ -57,7 +58,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: clinicTitle,
     description: clinicDescription,
-    images: [absoluteUrl("/images/doctora.jpg")],
+    images: [absoluteUrl(defaultSeoImage)],
   },
   robots: {
     index: true,

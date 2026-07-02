@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { absoluteUrl } from "@/lib/seo";
+import { absoluteUrl, defaultSeoImage } from "@/lib/seo";
 import { treatments } from "@/lib/treatments";
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -11,7 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified,
       changeFrequency: "weekly",
       priority: 1,
-      images: [absoluteUrl("/images/doctora.jpg")],
+      images: [absoluteUrl(defaultSeoImage)],
     },
     ...treatments.map((treatment) => ({
       url: absoluteUrl(`/tratamientos/${treatment.slug}`),
