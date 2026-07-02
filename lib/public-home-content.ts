@@ -14,6 +14,7 @@ import {
   defaultBookingContent,
   type BookingBlockContent,
 } from "@/components/BookingProcess";
+import { defaultAboutContent, type AboutBlockContent } from "@/components/About";
 
 export type EditableHomeBlock =
   | CardsBlockContent
@@ -21,7 +22,8 @@ export type EditableHomeBlock =
   | VideoBlockContent
   | ImageGalleryBlockContent
   | BookingBlockContent
-  | FaqBlockContent;
+  | FaqBlockContent
+  | AboutBlockContent;
 
 function parseBlock<T>(value: string, fallback: T) {
   if (!value.trim()) {
@@ -57,6 +59,7 @@ export function getEditableHomeContent(content: PublicSiteContent) {
       "Filosofía y resultados",
       defaultResultsContent,
     ),
+    about: getBlock(content, "Home", "Sobre la doctora", defaultAboutContent),
     whyChooseUs: getBlock(
       content,
       "Home",
@@ -83,6 +86,13 @@ export function getHomeContentDefaults() {
       content_type: "json" as const,
       value: serializeHomeBlockForAdmin(defaultResultsContent),
       description: "Título, texto y tarjetas de la sección de filosofía.",
+    },
+    {
+      section: "Home",
+      label: "Sobre la doctora",
+      content_type: "json" as const,
+      value: serializeHomeBlockForAdmin(defaultAboutContent),
+      description: "Textos, principios y botón de la sección Sobre la doctora.",
     },
     {
       section: "Home",

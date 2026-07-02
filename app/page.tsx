@@ -121,7 +121,7 @@ export default async function Home() {
 
       <WhyChooseUs content={editableHomeContent.whyChooseUs} />
 
-      <About whatsappUrl={whatsappUrl} />
+      <About whatsappUrl={whatsappUrl} content={editableHomeContent.about} />
 
       <VideoSection content={editableHomeContent.videos} />
 

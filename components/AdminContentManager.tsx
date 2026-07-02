@@ -55,6 +55,9 @@ type EditableStructuredBlock = {
   eyebrow?: string;
   title?: string;
   description?: string;
+  paragraphs?: string[];
+  principles?: string[];
+  ctaLabel?: string;
   cards?: {
     icon?: string;
     title: string;
@@ -895,7 +898,7 @@ export default function AdminContentManager({
     }
 
     function updateBlockField(
-      field: "eyebrow" | "title" | "description",
+      field: "eyebrow" | "title" | "description" | "ctaLabel",
       value: string,
     ) {
       updateBlock({ ...block, [field]: value });
@@ -957,6 +960,68 @@ export default function AdminContentManager({
                 updateBlockField("description", event.target.value)
               }
               className="admin-content-textarea min-h-24"
+            />
+          </AdminField>
+        ) : null}
+
+        {Array.isArray(block.paragraphs) ? (
+          <EditableList
+            title="PÃ¡rrafos"
+            items={block.paragraphs}
+            onAdd={() =>
+              updateBlock({
+                ...block,
+                paragraphs: [...(block.paragraphs ?? []), ""],
+              })
+            }
+            onChange={(index, value) => {
+              const paragraphs = [...(block.paragraphs ?? [])];
+              paragraphs[index] = value;
+              updateBlock({ ...block, paragraphs });
+            }}
+            onRemove={(index) =>
+              updateBlock({
+                ...block,
+                paragraphs: (block.paragraphs ?? []).filter(
+                  (_, itemIndex) => itemIndex !== index,
+                ),
+              })
+            }
+          />
+        ) : null}
+
+        {Array.isArray(block.principles) ? (
+          <EditableList
+            title="Principios"
+            items={block.principles}
+            onAdd={() =>
+              updateBlock({
+                ...block,
+                principles: [...(block.principles ?? []), ""],
+              })
+            }
+            onChange={(index, value) => {
+              const principles = [...(block.principles ?? [])];
+              principles[index] = value;
+              updateBlock({ ...block, principles });
+            }}
+            onRemove={(index) =>
+              updateBlock({
+                ...block,
+                principles: (block.principles ?? []).filter(
+                  (_, itemIndex) => itemIndex !== index,
+                ),
+              })
+            }
+          />
+        ) : null}
+
+        {"ctaLabel" in block ? (
+          <AdminField label="Texto del botÃ³n">
+            <input
+              value={block.ctaLabel ?? ""}
+              onChange={(event) => updateBlockField("ctaLabel", event.target.value)}
+              className="admin-content-input"
             />
           </AdminField>
         ) : null}
