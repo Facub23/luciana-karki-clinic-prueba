@@ -1,17 +1,23 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { CalendarPlus, Edit3, LogOut, Save, Trash2, XCircle } from "lucide-react";
+import {
+  CalendarDays,
+  CalendarPlus,
+  Edit3,
+  LogOut,
+  Save,
+  Trash2,
+  XCircle,
+} from "lucide-react";
 import AdminNav from "@/components/AdminNav";
 import {
-  LeadRecord,
   ReservationRecord,
   reservationStatusLabels,
 } from "@/lib/supabase-leads";
 
 type AdminReservationsCalendarProps = {
   initialReservations: ReservationRecord[];
-  leads: LeadRecord[];
 };
 
 type ReservationFilter = "all" | "upcoming" | "past";
@@ -54,11 +60,11 @@ function sortReservations(left: ReservationRecord, right: ReservationRecord) {
 
 export default function AdminReservationsCalendar({
   initialReservations,
-  leads,
 }: AdminReservationsCalendarProps) {
   const [reservations, setReservations] = useState(
     [...initialReservations].sort(sortReservations),
   );
+  const [today] = useState(() => new Date());
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [patientName, setPatientName] = useState("");
@@ -103,14 +109,6 @@ export default function AdminReservationsCalendar({
     setCurrentMonth(
       new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1),
     );
-  }
-
-  function fillFromLead(leadId: string) {
-    const lead = leads.find((item) => item.id === leadId);
-    if (!lead) return;
-    setPatientName(lead.name);
-    setPhone(lead.phone);
-    setTreatment(lead.treatment);
   }
 
   function startEditing(reservation: ReservationRecord) {
@@ -292,26 +290,90 @@ export default function AdminReservationsCalendar({
       <section className="mx-auto grid max-w-7xl gap-5 px-5 py-6 xl:grid-cols-[minmax(0,1fr)_420px]">
         <div className="rounded-lg border border-[#ead1d9] bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={previousMonth}
-              className="rounded-lg border border-[#ead1d9] px-3 py-2 text-sm hover:bg-[#fff3f6]"
-            >
-              Anterior
-            </button>
-            <h2 className="text-lg font-semibold capitalize text-[#5f4d56]">
-              {monthTitle(currentMonth)}
-            </h2>
-            <button
-              type="button"
-              onClick={nextMonth}
-              className="rounded-lg border border-[#ead1d9] px-3 py-2 text-sm hover:bg-[#fff3f6]"
-            >
-              Siguiente
-            </button>
+            <div className="flex items-center gap-3">
+              <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#fff3f6] text-[#c98fa1]">
+                <CalendarDays className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#c98fa1]">
+                  Calendario
+                </p>
+                <h2 className="text-xl font-semibold capitalize text-[#5f4d56]">
+                  {monthTitle(currentMonth)}
+                </h2>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={previousMonth}
+                className="rounded-lg border border-[#ead1d9] px-3 py-2 text-sm hover:bg-[#fff3f6]"
+              >
+                Anterior
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const today = new Date();
+                  setCurrentMonth(today);
+                  setSelectedDate(today);
+                  setDate(dateInputValue(today));
+                }}
+                className="rounded-lg bg-[#5f4d56] px-3 py-2 text-sm font-semibold text-white hover:bg-[#4f4048]"
+              >
+                Hoy
+              </button>
+              <button
+                type="button"
+                onClick={nextMonth}
+                className="rounded-lg border border-[#ead1d9] px-3 py-2 text-sm hover:bg-[#fff3f6]"
+              >
+                Siguiente
+              </button>
+            </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2 rounded-lg border border-[#ead1d9] bg-[#fffafb] p-2">
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            <div className="rounded-lg border border-[#ead1d9] bg-[#fffafb] px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a7583]">
+                Mes
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-[#5f4d56]">
+                {
+                  filteredReservations.filter(
+                    (reservation) =>
+                      new Date(reservation.starts_at).getMonth() ===
+                        currentMonth.getMonth() &&
+                      new Date(reservation.starts_at).getFullYear() ===
+                        currentMonth.getFullYear(),
+                  ).length
+                }
+              </p>
+            </div>
+            <div className="rounded-lg border border-[#ead1d9] bg-[#fffafb] px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a7583]">
+                Dia elegido
+              </p>
+              <p className="mt-1 text-2xl font-semibold text-[#5f4d56]">
+                {selectedReservations.length}
+              </p>
+            </div>
+            <div className="rounded-lg border border-[#ead1d9] bg-[#fffafb] px-4 py-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9a7583]">
+                Filtro
+              </p>
+              <p className="mt-1 text-sm font-semibold text-[#5f4d56]">
+                {filter === "upcoming"
+                  ? "Proximas"
+                  : filter === "past"
+                    ? "Pasadas"
+                    : "Todas"}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-2 rounded-lg border border-[#ead1d9] bg-[#fffafb] p-2">
             {[
               ["all", "Todas"],
               ["upcoming", "Proximas"],
@@ -345,6 +407,7 @@ export default function AdminReservationsCalendar({
                 .sort(sortReservations);
               const isCurrentMonth = day.getMonth() === currentMonth.getMonth();
               const isSelected = sameDay(day, selectedDate);
+              const isToday = sameDay(day, today);
 
               return (
                 <button
@@ -354,18 +417,35 @@ export default function AdminReservationsCalendar({
                     setSelectedDate(day);
                     setDate(dateInputValue(day));
                   }}
-                  className={`min-h-24 rounded-lg border p-2 text-left transition ${
+                  className={`min-h-32 rounded-lg border p-2 text-left transition ${
                     isSelected
-                      ? "border-[#c98fa1] bg-[#fff3f6]"
+                      ? "border-[#c98fa1] bg-[#fff3f6] shadow-sm"
                       : "border-[#ead1d9] bg-white hover:bg-[#fffafb]"
                   } ${isCurrentMonth ? "" : "opacity-45"}`}
                 >
-                  <span className="text-sm font-semibold">{day.getDate()}</span>
+                  <div className="flex items-center justify-between gap-2">
+                    <span
+                      className={`flex h-7 w-7 items-center justify-center rounded-full text-sm font-semibold ${
+                        isToday
+                          ? "bg-[#5f4d56] text-white"
+                          : isSelected
+                            ? "bg-[#c98fa1] text-white"
+                            : "text-[#5f4d56]"
+                      }`}
+                    >
+                      {day.getDate()}
+                    </span>
+                    {dayReservations.length ? (
+                      <span className="rounded-full bg-[#f7dfe7] px-2 py-0.5 text-[11px] font-semibold text-[#7a5664]">
+                        {dayReservations.length}
+                      </span>
+                    ) : null}
+                  </div>
                   <div className="mt-2 space-y-1">
                     {dayReservations.slice(0, 2).map((reservation) => (
                       <p
                         key={reservation.id}
-                        className="truncate rounded bg-[#f7dfe7] px-1.5 py-1 text-[11px] text-[#7a5664]"
+                        className="truncate rounded border-l-2 border-[#c98fa1] bg-[#fffafb] px-1.5 py-1 text-[11px] text-[#7a5664]"
                       >
                         {new Date(reservation.starts_at).toLocaleTimeString(
                           "es-ES",
@@ -529,19 +609,6 @@ export default function AdminReservationsCalendar({
             </h2>
 
             <div className="mt-4 space-y-3">
-              <select
-                onChange={(event) => fillFromLead(event.target.value)}
-                className="w-full rounded-lg border border-[#ead1d9] bg-[#fffafb] px-3 py-2.5 text-sm outline-none focus:border-[#c98fa1] focus:ring-4 focus:ring-[#efd8df]"
-                defaultValue=""
-              >
-                <option value="">Completar desde lead</option>
-                {leads.map((lead) => (
-                  <option key={lead.id} value={lead.id}>
-                    {lead.name} - {lead.treatment}
-                  </option>
-                ))}
-              </select>
-
               <input
                 value={patientName}
                 onChange={(event) => setPatientName(event.target.value)}
