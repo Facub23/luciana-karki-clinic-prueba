@@ -6,12 +6,12 @@ const SESSION_TTL_MS = 1000 * 60 * 60 * 12;
 
 type AdminSessionPayload = {
   issuedAt: number;
-  provider: "password" | "supabase";
+  provider: "supabase";
   email?: string;
 };
 
 function getSessionSecret() {
-  return process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD || "";
+  return process.env.ADMIN_SESSION_SECRET || "";
 }
 
 function signSession(value: string) {
@@ -66,15 +66,12 @@ function isAllowedAdminEmail(email: string) {
   return allowedEmails.includes(email.trim().toLowerCase());
 }
 
-export async function createAdminSession(input?: {
-  email?: string;
-  provider?: "password" | "supabase";
-}) {
+export async function createAdminSession(input: { email: string }) {
   const cookieStore = await cookies();
   const payload = encodePayload({
     issuedAt: Date.now(),
-    provider: input?.provider ?? "password",
-    email: input?.email,
+    provider: "supabase",
+    email: input.email,
   });
   const signature = signSession(payload);
 
@@ -123,30 +120,12 @@ export async function isAdminAuthenticated() {
       return false;
     }
 
-    if (payload.provider === "supabase" && payload.email) {
-      return isAllowedAdminEmail(payload.email);
-    }
-
-    return payload.provider === "password";
+    return payload.provider === "supabase" && payload.email
+      ? isAllowedAdminEmail(payload.email)
+      : false;
   }
 
-  const issuedAt = Number(timestamp);
-
-  if (Number.isNaN(issuedAt)) {
-    return false;
-  }
-
-  return Date.now() - issuedAt <= SESSION_TTL_MS;
-}
-
-export function isValidAdminPassword(password: string) {
-  const adminPassword = process.env.ADMIN_PASSWORD;
-
-  if (!adminPassword) {
-    return false;
-  }
-
-  return safeEqual(password, adminPassword);
+  return false;
 }
 
 export async function authenticateSupabaseAdmin(input: {

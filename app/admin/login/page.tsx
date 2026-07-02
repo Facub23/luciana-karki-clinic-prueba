@@ -47,6 +47,7 @@ export default async function AdminLoginPage({
             <input
               name="email"
               type="email"
+              required
               autoComplete="email"
               className="mt-2 w-full rounded-lg border border-[#ead1d9] bg-[#fffafb] px-4 py-3 text-[#4f4149] outline-none transition placeholder:text-[#9d828d] focus:border-[#c98fa1] focus:bg-white focus:ring-4 focus:ring-[#efd8df]"
               placeholder="admin@clinica.com"
@@ -74,8 +75,7 @@ export default async function AdminLoginPage({
           ) : null}
 
           <p className="mt-3 text-xs leading-5 text-gray-500">
-            Si todavía no hay usuario de Supabase Auth, puedes dejar el email
-            vacío y usar la contraseña temporal del admin.
+            Usa el usuario administrador autorizado para acceder al panel.
           </p>
 
           <button
