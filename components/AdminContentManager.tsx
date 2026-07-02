@@ -1404,7 +1404,9 @@ export default function AdminContentManager({
     }
 
     if (
-      (item.section === "Home" || item.section === "FAQ") &&
+      (item.section === "Home" ||
+        item.section === "FAQ" ||
+        item.section === "Global") &&
       item.content_type === "json"
     ) {
       return renderStructuredBlockEditor(item);

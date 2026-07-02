@@ -379,7 +379,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
         </div>
       </section>
 
-      <TrustSignals />
+      <TrustSignals content={siteSettings.trustSignals} />
 
       <BookingProcess />
 

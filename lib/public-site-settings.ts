@@ -1,5 +1,9 @@
 import { getPublicContentValue, PublicSiteContent } from "@/lib/site-content";
 import type { FaqBlockContent } from "@/components/FaqSection";
+import {
+  defaultTrustSignalsContent,
+  type TrustSignalsContent,
+} from "@/components/TrustSignals";
 
 export type FooterContent = {
   brandName: string;
@@ -98,8 +102,12 @@ export function getEditableSiteSettings(content: PublicSiteContent) {
     getPublicContentValue(content, "FAQ", "Tratamientos", ""),
     defaultTreatmentFaqContent,
   );
+  const trustSignals = parseSetting(
+    getPublicContentValue(content, "Global", "Confianza tratamientos", ""),
+    defaultTrustSignalsContent,
+  );
 
-  return { footer, contact, treatmentFaq };
+  return { footer, contact, treatmentFaq, trustSignals };
 }
 
 export function getSiteSettingsDefaults() {
@@ -125,6 +133,14 @@ export function getSiteSettingsDefaults() {
       value: serializeSetting(defaultTreatmentFaqContent),
       description:
         "Preguntas usadas en cada página de tratamiento. Puedes usar {treatment}.",
+    },
+    {
+      section: "Global",
+      label: "Confianza tratamientos",
+      content_type: "json" as const,
+      value: serializeSetting(defaultTrustSignalsContent satisfies TrustSignalsContent),
+      description:
+        "Tarjetas de confianza visibles en las páginas de tratamiento.",
     },
   ];
 }
