@@ -24,3 +24,13 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@layer components {
+  .admin-content-input {
+    @apply w-full rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-sm text-[#473a42] outline-none transition placeholder:text-gray-400 focus:border-[#c98fa1] focus:ring-4 focus:ring-[#efd8df];
+  }
+
+  .admin-content-textarea {
+    @apply w-full rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-sm leading-6 text-[#473a42] outline-none transition placeholder:text-gray-400 focus:border-[#c98fa1] focus:ring-4 focus:ring-[#efd8df];
+  }
+}
