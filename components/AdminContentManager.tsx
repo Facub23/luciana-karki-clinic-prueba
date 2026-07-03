@@ -45,6 +45,10 @@ type EditableTreatmentContent = {
   idealFor?: string[];
   details?: Record<string, string>;
   image?: string;
+  galleryImages?: {
+    src: string;
+    title: string;
+  }[];
 };
 
 type EditablePromotionContent = {
@@ -799,6 +803,41 @@ export default function AdminContentManager({
             </div>
           </div>
         </AdminField>
+
+        <MediaListEditor
+          title="Fotos del tratamiento"
+          addLabel="Agregar foto"
+          items={treatment.galleryImages ?? []}
+          srcLabel="Foto"
+          textLabel="Texto alternativo"
+          accept="image/*"
+          onAdd={() =>
+            updateTreatment({
+              ...treatment,
+              galleryImages: [
+                ...(treatment.galleryImages ?? []),
+                { src: "", title: "Nueva foto" },
+              ],
+            })
+          }
+          onChange={(index, value) => {
+            const galleryImages = [...(treatment.galleryImages ?? [])];
+            galleryImages[index] = value;
+            updateTreatment({
+              ...treatment,
+              galleryImages,
+              image: treatment.image || value.src,
+            });
+          }}
+          onRemove={(index) =>
+            updateTreatment({
+              ...treatment,
+              galleryImages: (treatment.galleryImages ?? []).filter(
+                (_, itemIndex) => itemIndex !== index,
+              ),
+            })
+          }
+        />
 
         <EditableList
           title="Beneficios"

@@ -175,6 +175,12 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
     })),
   };
   const pageDetails = getPageDetails(treatment);
+  const treatmentImages =
+    treatment.galleryImages && treatment.galleryImages.length > 0
+      ? treatment.galleryImages
+      : treatment.image
+        ? [{ src: treatment.image, title: treatment.name }]
+        : [];
   const detailItems = [
     { label: "Duración", value: pageDetails.duration, icon: Timer },
     { label: "Técnica", value: pageDetails.technique, icon: Droplets },
@@ -239,17 +245,32 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
             </span>
           </div>
 
-          {treatment.image ? (
+          {treatmentImages.length ? (
             <div className="mt-10 overflow-hidden rounded-[32px] border border-[#ead1d9] bg-white p-3 shadow-[0_18px_50px_rgba(107,91,99,0.12)]">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-[#fffafb] sm:aspect-[16/10]">
-                <Image
-                  src={treatment.image}
-                  alt={treatment.name}
-                  fill
-                  sizes="(min-width: 1024px) 760px, 100vw"
-                  className="object-contain"
-                  priority
-                />
+              <div
+                className={`grid gap-3 ${
+                  treatmentImages.length > 1 ? "sm:grid-cols-2" : ""
+                }`}
+              >
+                {treatmentImages.map((image, index) => (
+                  <div
+                    key={`${image.src}-${index}`}
+                    className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-[#fffafb]"
+                  >
+                    <Image
+                      src={image.src}
+                      alt={image.title || treatment.name}
+                      fill
+                      sizes={
+                        treatmentImages.length > 1
+                          ? "(min-width: 1024px) 380px, 100vw"
+                          : "(min-width: 1024px) 760px, 100vw"
+                      }
+                      className="object-cover"
+                      priority={index === 0}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           ) : null}

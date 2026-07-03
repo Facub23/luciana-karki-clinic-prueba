@@ -23,6 +23,10 @@ export type Treatment = {
   idealFor: string[];
   details?: Partial<TreatmentDetails>;
   image: string;
+  galleryImages?: {
+    src: string;
+    title: string;
+  }[];
 };
 
 export const treatments: Treatment[] = [
@@ -176,7 +180,17 @@ export const treatments: Treatment[] = [
       precautions:
         "No se recomienda durante embarazo, lactancia o si existen lesiones activas en la zona. La indicación se confirma siempre en valoración médica.",
     },
-    image: "/images/tratamiento-4.png",
+    image: "/images/peeling-axilas-1.png",
+    galleryImages: [
+      {
+        src: "/images/peeling-axilas-1.png",
+        title: "Detalle de axila",
+      },
+      {
+        src: "/images/peeling-axilas-2.png",
+        title: "Tratamiento de axilas",
+      },
+    ],
   },
   {
     slug: "labios-acido-hialuronico",

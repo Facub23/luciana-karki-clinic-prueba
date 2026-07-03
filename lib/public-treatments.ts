@@ -39,6 +39,7 @@ export function serializeTreatmentForAdmin(treatment: Treatment) {
       idealFor: treatment.idealFor,
       details: treatment.details ?? {},
       image: treatment.image,
+      galleryImages: treatment.galleryImages ?? [],
     },
     null,
     2,
@@ -63,6 +64,9 @@ export function getEditableTreatment(treatment: Treatment, content: PublicSiteCo
       ...(treatment.details ?? {}),
       ...(override.details ?? {}),
     },
+    galleryImages: Array.isArray(override.galleryImages)
+      ? override.galleryImages
+      : treatment.galleryImages,
   };
 }
 
