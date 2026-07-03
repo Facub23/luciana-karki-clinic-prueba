@@ -27,10 +27,32 @@ export async function POST(request: Request) {
     );
   }
 
-  const [reservation] = await createReservation(parsedBody.data);
+  try {
+    const [reservation] = await createReservation(parsedBody.data);
 
-  return Response.json({
-    ok: true,
-    reservation,
-  });
+    if (!reservation) {
+      return Response.json(
+        { ok: false, error: "No se pudo crear la reserva" },
+        { status: 502 },
+      );
+    }
+
+    return Response.json({
+      ok: true,
+      reservation,
+    });
+  } catch (error) {
+    console.error("Reservation creation failed", error);
+
+    return Response.json(
+      {
+        ok: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "No se pudo crear la reserva",
+      },
+      { status: 502 },
+    );
+  }
 }

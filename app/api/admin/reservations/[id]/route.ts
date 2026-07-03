@@ -33,12 +33,34 @@ export async function PATCH(
     );
   }
 
-  const [reservation] = await updateReservation(id, parsedBody.data);
+  try {
+    const [reservation] = await updateReservation(id, parsedBody.data);
 
-  return Response.json({
-    ok: true,
-    reservation,
-  });
+    if (!reservation) {
+      return Response.json(
+        { ok: false, error: "Reserva no encontrada" },
+        { status: 404 },
+      );
+    }
+
+    return Response.json({
+      ok: true,
+      reservation,
+    });
+  } catch (error) {
+    console.error("Reservation update failed", error);
+
+    return Response.json(
+      {
+        ok: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "No se pudo actualizar la reserva",
+      },
+      { status: 502 },
+    );
+  }
 }
 
 export async function DELETE(
@@ -50,7 +72,23 @@ export async function DELETE(
   }
 
   const { id } = await params;
-  await deleteReservation(id);
 
-  return Response.json({ ok: true });
+  try {
+    await deleteReservation(id);
+
+    return Response.json({ ok: true });
+  } catch (error) {
+    console.error("Reservation deletion failed", error);
+
+    return Response.json(
+      {
+        ok: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : "No se pudo eliminar la reserva",
+      },
+      { status: 502 },
+    );
+  }
 }
