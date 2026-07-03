@@ -176,12 +176,12 @@ type EditableLegalContent = {
 };
 
 const treatmentDetailFields = [
-  ["duration", "DuraciÃ³n"],
-  ["technique", "TÃ©cnica"],
+  ["duration", "Duración"],
+  ["technique", "Técnica"],
   ["comfort", "Confort"],
-  ["recovery", "RecuperaciÃ³n"],
+  ["recovery", "Recuperación"],
   ["results", "Resultados"],
-  ["effectDuration", "DuraciÃ³n del efecto"],
+  ["effectDuration", "Duración del efecto"],
   ["sessions", "Sesiones"],
   ["contribution", "Lo que aporta"],
   ["care", "Cuidados"],
@@ -249,7 +249,7 @@ export default function AdminContentManager({
       try {
         JSON.parse(value);
       } catch {
-        setMessage("El JSON no es vÃ¡lido. Revisa comas, comillas y llaves.");
+        setMessage("El JSON no es válido. Revisa comas, comillas y llaves.");
         return;
       }
     }
@@ -288,7 +288,7 @@ export default function AdminContentManager({
             : item,
         ),
       );
-      setMessage("Borrador guardado. La web pÃºblica todavÃ­a no cambiÃ³.");
+      setMessage("Borrador guardado. La web pública todavía no cambió.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "No se pudo guardar");
     } finally {
@@ -479,7 +479,7 @@ export default function AdminContentManager({
             const detail =
               record.price || record.shortDescription || record.description || record.text || "";
 
-            return [title, detail].filter(Boolean).join(" Â· ");
+            return [title, detail].filter(Boolean).join(" · ");
           }
 
           return String(entry);
@@ -519,7 +519,7 @@ export default function AdminContentManager({
 
       return [String(parsed)];
     } catch {
-      return ["El contenido todavÃ­a no tiene un formato vÃ¡lido para previsualizar."];
+      return ["El contenido todavía no tiene un formato válido para previsualizar."];
     }
   }
 
@@ -562,18 +562,18 @@ export default function AdminContentManager({
 
   function renderContentPreview(item: AdminContentItem) {
     const hasLocalChange = item.value !== item.publishedValue;
-    const draftTitle = item.hasDraft ? "Borrador guardado" : "EdiciÃ³n actual";
+    const draftTitle = item.hasDraft ? "Borrador guardado" : "Edición actual";
 
     return (
       <div className="mt-4 rounded-lg border border-[#ead1d9] bg-white p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="text-sm font-semibold text-[#5f4d56]">
-              Vista previa antes/despuÃ©s
+              Vista previa antes/después
             </p>
             <p className="mt-1 text-xs text-gray-500">
-              Revisa lo publicado frente a lo que se publicarÃ­a antes de tocar
-              el botÃ³n Publicar.
+              Revisa lo publicado frente a lo que se publicaría antes de tocar
+              el botón Publicar.
             </p>
           </div>
           <span
@@ -723,7 +723,7 @@ export default function AdminContentManager({
             />
           </AdminField>
 
-          <AdminField label="CategorÃ­a">
+          <AdminField label="Categoría">
             <input
               value={treatment.category ?? ""}
               onChange={(event) => updateField("category", event.target.value)}
@@ -749,7 +749,7 @@ export default function AdminContentManager({
           </AdminField>
         </div>
 
-        <AdminField label="DescripciÃ³n corta">
+        <AdminField label="Descripción corta">
           <textarea
             value={treatment.shortDescription ?? ""}
             onChange={(event) =>
@@ -759,7 +759,7 @@ export default function AdminContentManager({
           />
         </AdminField>
 
-        <AdminField label="Texto principal de la pÃ¡gina">
+        <AdminField label="Texto principal de la página">
           <textarea
             value={treatment.salesDescription ?? ""}
             onChange={(event) =>
@@ -818,7 +818,7 @@ export default function AdminContentManager({
 
         <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
           <h3 className="text-sm font-semibold text-[#5f4d56]">
-            Ficha tÃ©cnica
+            Ficha técnica
           </h3>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {treatmentDetailFields.map(([field, label]) => (
@@ -949,7 +949,7 @@ export default function AdminContentManager({
               ...promotions,
               {
                 src: "",
-                alt: "Nueva promociÃ³n",
+                alt: "Nueva promoción",
                 shape: "compact",
               },
             ])
@@ -1015,7 +1015,7 @@ export default function AdminContentManager({
           ) : null}
 
           {"title" in block ? (
-            <AdminField label="TÃ­tulo">
+            <AdminField label="Título">
               <input
                 value={block.title ?? ""}
                 onChange={(event) => updateBlockField("title", event.target.value)}
@@ -1026,7 +1026,7 @@ export default function AdminContentManager({
         </div>
 
         {"description" in block ? (
-          <AdminField label="DescripciÃ³n">
+          <AdminField label="Descripción">
             <textarea
               value={block.description ?? ""}
               onChange={(event) =>
@@ -1039,7 +1039,7 @@ export default function AdminContentManager({
 
         {Array.isArray(block.paragraphs) ? (
           <EditableList
-            title="PÃƒÂ¡rrafos"
+            title="Párrafos"
             items={block.paragraphs}
             onAdd={() =>
               updateBlock({
@@ -1090,7 +1090,7 @@ export default function AdminContentManager({
         ) : null}
 
         {"ctaLabel" in block ? (
-          <AdminField label="Texto del botÃƒÂ³n">
+          <AdminField label="Texto del botón">
             <input
               value={block.ctaLabel ?? ""}
               onChange={(event) => updateBlockField("ctaLabel", event.target.value)}
@@ -1140,7 +1140,7 @@ export default function AdminContentManager({
                   ) : null}
 
                   <div className="mt-3">
-                    <AdminField label="TÃ­tulo">
+                    <AdminField label="Título">
                       <input
                         value={card.title}
                         onChange={(event) =>
@@ -1185,7 +1185,7 @@ export default function AdminContentManager({
             addLabel="Agregar video"
             items={block.videos}
             srcLabel="Video"
-            textLabel="TÃ­tulo"
+            textLabel="Título"
             accept="video/mp4,video/webm"
             onAdd={() =>
               updateBlock({
@@ -1202,7 +1202,7 @@ export default function AdminContentManager({
 
         {Array.isArray(block.images) ? (
           <MediaListEditor
-            title="ImÃ¡genes"
+            title="Imágenes"
             addLabel="Agregar imagen"
             items={block.images.map((image) => ({
               src: image.src,
@@ -1838,7 +1838,7 @@ export default function AdminContentManager({
           </AdminField>
         </div>
 
-        <AdminField label="DescripciÃ³n">
+        <AdminField label="Descripción">
           <textarea
             value={footer.description ?? ""}
             onChange={(event) => updateField("description", event.target.value)}
@@ -1847,7 +1847,7 @@ export default function AdminContentManager({
         </AdminField>
 
         <EditableList
-          title="DirecciÃ³n / lÃ­neas de contacto"
+          title="Dirección / líneas de contacto"
           items={footer.addressLines ?? []}
           onAdd={() =>
             updateFooter({
@@ -1914,7 +1914,7 @@ export default function AdminContentManager({
             />
           </AdminField>
 
-          <AdminField label="TÃ­tulo">
+          <AdminField label="Título">
             <input
               value={contact.title ?? ""}
               onChange={(event) => updateField("title", event.target.value)}
@@ -1924,7 +1924,7 @@ export default function AdminContentManager({
         </div>
 
         <EditableList
-          title="LÃ­neas de contacto"
+          title="Líneas de contacto"
           items={contact.lines ?? []}
           onAdd={() =>
             updateContact({ ...contact, lines: [...(contact.lines ?? []), ""] })
@@ -1943,7 +1943,7 @@ export default function AdminContentManager({
           onRemove={(index) => removeListItem("cards", index)}
         />
 
-        <AdminField label="Texto del botÃ³n">
+        <AdminField label="Texto del botón">
           <input
             value={contact.ctaLabel ?? ""}
             onChange={(event) => updateField("ctaLabel", event.target.value)}
@@ -2170,7 +2170,7 @@ export default function AdminContentManager({
 
     return (
       <div className="mt-4 space-y-5">
-        <AdminField label="TÃ­tulo">
+        <AdminField label="Título">
           <input
             value={legal.title ?? ""}
             onChange={(event) =>
@@ -2392,7 +2392,7 @@ export default function AdminContentManager({
                         <Eye className="h-4 w-4" aria-hidden="true" />
                         {previewOpenIds.has(item.id)
                           ? "Ocultar vista previa"
-                          : "Ver antes/despuÃ©s"}
+                          : "Ver antes/después"}
                       </button>
 
                       <button
@@ -2500,7 +2500,7 @@ function EditableList({
           ))
         ) : (
           <p className="rounded-lg border border-dashed border-[#ead1d9] bg-[#fffafb] px-4 py-3 text-sm text-gray-500">
-            No hay elementos todavÃ­a.
+            No hay elementos todavía.
           </p>
         )}
       </div>
@@ -2646,7 +2646,7 @@ function TextPairListEditor({
       <div className="mt-4 space-y-4">
         {items.map((item, index) => (
           <div key={index} className="rounded-lg bg-[#fffafb] p-4">
-            <AdminField label="TÃ­tulo">
+            <AdminField label="Título">
               <input
                 value={item.title}
                 onChange={(event) =>
@@ -2829,7 +2829,7 @@ function MediaPickerButton({
               {!isLoading && !visibleAssets.length ? (
                 <div className="rounded-lg border border-dashed border-[#ead1d9] bg-[#fffafb] p-8 text-center text-sm text-gray-500">
                   No hay medios para este tipo. Puedes subir uno desde este mismo
-                  campo o desde la seccion Medios.
+                  campo o desde la sección Biblioteca.
                 </div>
               ) : null}
             </div>

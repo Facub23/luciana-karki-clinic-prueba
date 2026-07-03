@@ -46,23 +46,19 @@ export default function Hero({
   leadFormContent,
 }: HeroProps) {
   return (
-    <section id="inicio" className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
-      <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
+    <section id="inicio" className="mx-auto max-w-7xl px-6 py-10 lg:py-14">
+      <div className="grid gap-10 lg:grid-cols-2 lg:items-start lg:gap-16">
         <div className="flex flex-col">
           <div className="max-w-xl">
-            <LeadForm
-              compact
-              phoneNumber={phoneNumber}
-              content={leadFormContent}
-            />
+            <LeadForm compact phoneNumber={phoneNumber} content={leadFormContent} />
           </div>
 
-          <div className="mt-8 lg:mt-10">
+          <div className="mt-7 lg:mt-8">
             <span className="text-xs uppercase tracking-[0.24em] text-[#d9a8b5] sm:text-sm">
               {content.eyebrow}
             </span>
 
-            <h1 className="mt-5 max-w-3xl text-4xl font-light leading-tight text-[#6b5b63] sm:text-5xl lg:text-6xl">
+            <h1 className="mt-5 max-w-3xl text-4xl font-light leading-tight text-[#6b5b63] sm:text-5xl lg:text-[4rem]">
               {content.title}
             </h1>
 
@@ -70,7 +66,7 @@ export default function Hero({
               {content.doctor}
             </h2>
 
-            <p className="mt-7 max-w-2xl text-base leading-8 text-gray-600 sm:text-lg">
+            <p className="mt-6 max-w-2xl text-base leading-8 text-gray-600 sm:text-lg">
               {content.description}
             </p>
 

@@ -496,8 +496,14 @@ export const treatmentCategories = Array.from(
   new Set(treatments.map((treatment) => treatment.category)),
 );
 
+const treatmentSlugAliases: Record<string, string> = {
+  labios: "labios-acido-hialuronico",
+};
+
 export function getTreatmentBySlug(slug: string) {
-  return treatments.find((treatment) => treatment.slug === slug);
+  const normalizedSlug = treatmentSlugAliases[slug] ?? slug;
+
+  return treatments.find((treatment) => treatment.slug === normalizedSlug);
 }
 
 export function getTreatmentsByCategory(category: string) {
