@@ -21,6 +21,29 @@ export type ContactContent = {
   ctaLabel: string;
 };
 
+export type TreatmentPageContent = {
+  approach: {
+    eyebrow: string;
+    title: string;
+    description: string;
+  };
+  protocol: {
+    eyebrow: string;
+    title: string;
+    careTitle: string;
+    precautionsTitle: string;
+  };
+  assessment: {
+    eyebrow: string;
+    title: string;
+    items: string[];
+  };
+  closing: {
+    title: string;
+    description: string;
+  };
+};
+
 export const defaultFooterContent: FooterContent = {
   brandName: "Dra. Luciana Karki Martín",
   description:
@@ -68,6 +91,35 @@ export const defaultTreatmentFaqContent: FaqBlockContent = {
   ],
 };
 
+export const defaultTreatmentPageContent: TreatmentPageContent = {
+  approach: {
+    eyebrow: "Enfoque del tratamiento",
+    title: "Indicación personalizada, resultado natural",
+    description:
+      "Antes de tratar se revisa la zona, el objetivo estético y la armonía general. Así se define una propuesta proporcionada, realista y adaptada a tu caso.",
+  },
+  protocol: {
+    eyebrow: "Protocolo personalizado",
+    title: "Un plan diseñado para tu caso",
+    careTitle: "Cuidados posteriores",
+    precautionsTitle: "Precauciones",
+  },
+  assessment: {
+    eyebrow: "Valoración previa",
+    title: "Qué revisamos antes de indicar el tratamiento",
+    items: [
+      "Tus objetivos y expectativas",
+      "Proporciones y armonía facial o corporal",
+      "Plan recomendado, precio y próximos pasos",
+    ],
+  },
+  closing: {
+    title: "Reserva con una valoración",
+    description:
+      "Cada tratamiento se indica después de revisar tu caso, tus objetivos y tu anatomía. La prioridad es un resultado natural, seguro y coherente contigo.",
+  },
+};
+
 function parseSetting<T>(value: string, fallback: T) {
   if (!value.trim()) {
     return fallback;
@@ -106,8 +158,12 @@ export function getEditableSiteSettings(content: PublicSiteContent) {
     getPublicContentValue(content, "Global", "Confianza tratamientos", ""),
     defaultTrustSignalsContent,
   );
+  const treatmentPage = parseSetting(
+    getPublicContentValue(content, "Global", "Páginas de tratamiento", ""),
+    defaultTreatmentPageContent,
+  );
 
-  return { footer, contact, treatmentFaq, trustSignals };
+  return { footer, contact, treatmentFaq, trustSignals, treatmentPage };
 }
 
 export function getSiteSettingsDefaults() {
@@ -141,6 +197,14 @@ export function getSiteSettingsDefaults() {
       value: serializeSetting(defaultTrustSignalsContent satisfies TrustSignalsContent),
       description:
         "Tarjetas de confianza visibles en las páginas de tratamiento.",
+    },
+    {
+      section: "Global",
+      label: "Páginas de tratamiento",
+      content_type: "json" as const,
+      value: serializeSetting(defaultTreatmentPageContent),
+      description:
+        "Textos globales usados dentro de todas las páginas de tratamiento.",
     },
   ];
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
@@ -97,18 +97,41 @@ type EditableContactContent = {
   ctaLabel?: string;
 };
 
+type EditableTreatmentPageContent = {
+  approach?: {
+    eyebrow?: string;
+    title?: string;
+    description?: string;
+  };
+  protocol?: {
+    eyebrow?: string;
+    title?: string;
+    careTitle?: string;
+    precautionsTitle?: string;
+  };
+  assessment?: {
+    eyebrow?: string;
+    title?: string;
+    items?: string[];
+  };
+  closing?: {
+    title?: string;
+    description?: string;
+  };
+};
+
 type EditableLegalContent = {
   title?: string;
   body?: string;
 };
 
 const treatmentDetailFields = [
-  ["duration", "Duración"],
-  ["technique", "Técnica"],
+  ["duration", "DuraciÃ³n"],
+  ["technique", "TÃ©cnica"],
   ["comfort", "Confort"],
-  ["recovery", "Recuperación"],
+  ["recovery", "RecuperaciÃ³n"],
   ["results", "Resultados"],
-  ["effectDuration", "Duración del efecto"],
+  ["effectDuration", "DuraciÃ³n del efecto"],
   ["sessions", "Sesiones"],
   ["contribution", "Lo que aporta"],
   ["care", "Cuidados"],
@@ -176,7 +199,7 @@ export default function AdminContentManager({
       try {
         JSON.parse(value);
       } catch {
-        setMessage("El JSON no es válido. Revisa comas, comillas y llaves.");
+        setMessage("El JSON no es vÃ¡lido. Revisa comas, comillas y llaves.");
         return;
       }
     }
@@ -215,7 +238,7 @@ export default function AdminContentManager({
             : item,
         ),
       );
-      setMessage("Borrador guardado. La web pública todavía no cambió.");
+      setMessage("Borrador guardado. La web pÃºblica todavÃ­a no cambiÃ³.");
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "No se pudo guardar");
     } finally {
@@ -406,7 +429,7 @@ export default function AdminContentManager({
             const detail =
               record.price || record.shortDescription || record.description || record.text || "";
 
-            return [title, detail].filter(Boolean).join(" · ");
+            return [title, detail].filter(Boolean).join(" Â· ");
           }
 
           return String(entry);
@@ -446,7 +469,7 @@ export default function AdminContentManager({
 
       return [String(parsed)];
     } catch {
-      return ["El contenido todavía no tiene un formato válido para previsualizar."];
+      return ["El contenido todavÃ­a no tiene un formato vÃ¡lido para previsualizar."];
     }
   }
 
@@ -489,18 +512,18 @@ export default function AdminContentManager({
 
   function renderContentPreview(item: AdminContentItem) {
     const hasLocalChange = item.value !== item.publishedValue;
-    const draftTitle = item.hasDraft ? "Borrador guardado" : "Edición actual";
+    const draftTitle = item.hasDraft ? "Borrador guardado" : "EdiciÃ³n actual";
 
     return (
       <div className="mt-4 rounded-lg border border-[#ead1d9] bg-white p-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div>
             <p className="text-sm font-semibold text-[#5f4d56]">
-              Vista previa antes/después
+              Vista previa antes/despuÃ©s
             </p>
             <p className="mt-1 text-xs text-gray-500">
-              Revisa lo publicado frente a lo que se publicaría antes de tocar
-              el botón Publicar.
+              Revisa lo publicado frente a lo que se publicarÃ­a antes de tocar
+              el botÃ³n Publicar.
             </p>
           </div>
           <span
@@ -650,7 +673,7 @@ export default function AdminContentManager({
             />
           </AdminField>
 
-          <AdminField label="Categoría">
+          <AdminField label="CategorÃ­a">
             <input
               value={treatment.category ?? ""}
               onChange={(event) => updateField("category", event.target.value)}
@@ -676,7 +699,7 @@ export default function AdminContentManager({
           </AdminField>
         </div>
 
-        <AdminField label="Descripción corta">
+        <AdminField label="DescripciÃ³n corta">
           <textarea
             value={treatment.shortDescription ?? ""}
             onChange={(event) =>
@@ -686,7 +709,7 @@ export default function AdminContentManager({
           />
         </AdminField>
 
-        <AdminField label="Texto principal de la página">
+        <AdminField label="Texto principal de la pÃ¡gina">
           <textarea
             value={treatment.salesDescription ?? ""}
             onChange={(event) =>
@@ -745,7 +768,7 @@ export default function AdminContentManager({
 
         <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
           <h3 className="text-sm font-semibold text-[#5f4d56]">
-            Ficha técnica
+            Ficha tÃ©cnica
           </h3>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             {treatmentDetailFields.map(([field, label]) => (
@@ -876,7 +899,7 @@ export default function AdminContentManager({
               ...promotions,
               {
                 src: "",
-                alt: "Nueva promoción",
+                alt: "Nueva promociÃ³n",
                 shape: "compact",
               },
             ])
@@ -942,7 +965,7 @@ export default function AdminContentManager({
           ) : null}
 
           {"title" in block ? (
-            <AdminField label="Título">
+            <AdminField label="TÃ­tulo">
               <input
                 value={block.title ?? ""}
                 onChange={(event) => updateBlockField("title", event.target.value)}
@@ -953,7 +976,7 @@ export default function AdminContentManager({
         </div>
 
         {"description" in block ? (
-          <AdminField label="Descripción">
+          <AdminField label="DescripciÃ³n">
             <textarea
               value={block.description ?? ""}
               onChange={(event) =>
@@ -966,7 +989,7 @@ export default function AdminContentManager({
 
         {Array.isArray(block.paragraphs) ? (
           <EditableList
-            title="PÃ¡rrafos"
+            title="PÃƒÂ¡rrafos"
             items={block.paragraphs}
             onAdd={() =>
               updateBlock({
@@ -1017,7 +1040,7 @@ export default function AdminContentManager({
         ) : null}
 
         {"ctaLabel" in block ? (
-          <AdminField label="Texto del botÃ³n">
+          <AdminField label="Texto del botÃƒÂ³n">
             <input
               value={block.ctaLabel ?? ""}
               onChange={(event) => updateBlockField("ctaLabel", event.target.value)}
@@ -1067,7 +1090,7 @@ export default function AdminContentManager({
                   ) : null}
 
                   <div className="mt-3">
-                    <AdminField label="Título">
+                    <AdminField label="TÃ­tulo">
                       <input
                         value={card.title}
                         onChange={(event) =>
@@ -1112,7 +1135,7 @@ export default function AdminContentManager({
             addLabel="Agregar video"
             items={block.videos}
             srcLabel="Video"
-            textLabel="Título"
+            textLabel="TÃ­tulo"
             accept="video/mp4,video/webm"
             onAdd={() =>
               updateBlock({
@@ -1129,7 +1152,7 @@ export default function AdminContentManager({
 
         {Array.isArray(block.images) ? (
           <MediaListEditor
-            title="Imágenes"
+            title="ImÃ¡genes"
             addLabel="Agregar imagen"
             items={block.images.map((image) => ({
               src: image.src,
@@ -1246,7 +1269,7 @@ export default function AdminContentManager({
           </AdminField>
         </div>
 
-        <AdminField label="Descripción">
+        <AdminField label="DescripciÃ³n">
           <textarea
             value={footer.description ?? ""}
             onChange={(event) => updateField("description", event.target.value)}
@@ -1255,7 +1278,7 @@ export default function AdminContentManager({
         </AdminField>
 
         <EditableList
-          title="Dirección / líneas de contacto"
+          title="DirecciÃ³n / lÃ­neas de contacto"
           items={footer.addressLines ?? []}
           onAdd={() =>
             updateFooter({
@@ -1322,7 +1345,7 @@ export default function AdminContentManager({
             />
           </AdminField>
 
-          <AdminField label="Título">
+          <AdminField label="TÃ­tulo">
             <input
               value={contact.title ?? ""}
               onChange={(event) => updateField("title", event.target.value)}
@@ -1332,7 +1355,7 @@ export default function AdminContentManager({
         </div>
 
         <EditableList
-          title="Líneas de contacto"
+          title="LÃ­neas de contacto"
           items={contact.lines ?? []}
           onAdd={() =>
             updateContact({ ...contact, lines: [...(contact.lines ?? []), ""] })
@@ -1351,13 +1374,220 @@ export default function AdminContentManager({
           onRemove={(index) => removeListItem("cards", index)}
         />
 
-        <AdminField label="Texto del botón">
+        <AdminField label="Texto del botÃ³n">
           <input
             value={contact.ctaLabel ?? ""}
             onChange={(event) => updateField("ctaLabel", event.target.value)}
             className="admin-content-input"
           />
         </AdminField>
+      </div>
+    );
+  }
+
+  function renderTreatmentPageEditor(item: SiteContentRecord) {
+    const pageContent = parseJsonValue<EditableTreatmentPageContent>(item.value, {});
+
+    function updatePageContent(nextValue: EditableTreatmentPageContent) {
+      updateDraft(item.id, stringifyJsonValue(nextValue));
+    }
+
+    function updateSectionField<
+      Section extends keyof EditableTreatmentPageContent,
+      Field extends keyof NonNullable<EditableTreatmentPageContent[Section]>,
+    >(section: Section, field: Field, value: string) {
+      updatePageContent({
+        ...pageContent,
+        [section]: {
+          ...(pageContent[section] ?? {}),
+          [field]: value,
+        },
+      });
+    }
+
+    function updateAssessmentItem(index: number, value: string) {
+      const items = [...(pageContent.assessment?.items ?? [])];
+      items[index] = value;
+      updatePageContent({
+        ...pageContent,
+        assessment: {
+          ...(pageContent.assessment ?? {}),
+          items,
+        },
+      });
+    }
+
+    return (
+      <div className="mt-4 space-y-6">
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">
+            Enfoque inicial
+          </h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <AdminField label="Etiqueta superior">
+              <input
+                value={pageContent.approach?.eyebrow ?? ""}
+                onChange={(event) =>
+                  updateSectionField("approach", "eyebrow", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Título">
+              <input
+                value={pageContent.approach?.title ?? ""}
+                onChange={(event) =>
+                  updateSectionField("approach", "title", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+          </div>
+          <div className="mt-4">
+            <AdminField label="Descripción">
+              <textarea
+                value={pageContent.approach?.description ?? ""}
+                onChange={(event) =>
+                  updateSectionField(
+                    "approach",
+                    "description",
+                    event.target.value,
+                  )
+                }
+                className="admin-content-textarea min-h-24"
+              />
+            </AdminField>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">
+            Protocolo
+          </h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <AdminField label="Etiqueta superior">
+              <input
+                value={pageContent.protocol?.eyebrow ?? ""}
+                onChange={(event) =>
+                  updateSectionField("protocol", "eyebrow", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Título">
+              <input
+                value={pageContent.protocol?.title ?? ""}
+                onChange={(event) =>
+                  updateSectionField("protocol", "title", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Título cuidados">
+              <input
+                value={pageContent.protocol?.careTitle ?? ""}
+                onChange={(event) =>
+                  updateSectionField("protocol", "careTitle", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Título precauciones">
+              <input
+                value={pageContent.protocol?.precautionsTitle ?? ""}
+                onChange={(event) =>
+                  updateSectionField(
+                    "protocol",
+                    "precautionsTitle",
+                    event.target.value,
+                  )
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">
+            Valoración previa
+          </h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <AdminField label="Etiqueta superior">
+              <input
+                value={pageContent.assessment?.eyebrow ?? ""}
+                onChange={(event) =>
+                  updateSectionField("assessment", "eyebrow", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Título">
+              <input
+                value={pageContent.assessment?.title ?? ""}
+                onChange={(event) =>
+                  updateSectionField("assessment", "title", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+          </div>
+          <div className="mt-4">
+            <EditableList
+              title="Puntos de valoración"
+              items={pageContent.assessment?.items ?? []}
+              onAdd={() =>
+                updatePageContent({
+                  ...pageContent,
+                  assessment: {
+                    ...(pageContent.assessment ?? {}),
+                    items: [...(pageContent.assessment?.items ?? []), ""],
+                  },
+                })
+              }
+              onChange={updateAssessmentItem}
+              onRemove={(index) =>
+                updatePageContent({
+                  ...pageContent,
+                  assessment: {
+                    ...(pageContent.assessment ?? {}),
+                    items: (pageContent.assessment?.items ?? []).filter(
+                      (_, itemIndex) => itemIndex !== index,
+                    ),
+                  },
+                })
+              }
+            />
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">
+            Cierre de reserva
+          </h3>
+          <div className="mt-4">
+            <AdminField label="Título">
+              <input
+                value={pageContent.closing?.title ?? ""}
+                onChange={(event) =>
+                  updateSectionField("closing", "title", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+          </div>
+          <div className="mt-4">
+            <AdminField label="Descripción">
+              <textarea
+                value={pageContent.closing?.description ?? ""}
+                onChange={(event) =>
+                  updateSectionField("closing", "description", event.target.value)
+                }
+                className="admin-content-textarea min-h-24"
+              />
+            </AdminField>
+          </div>
+        </div>
       </div>
     );
   }
@@ -1371,7 +1601,7 @@ export default function AdminContentManager({
 
     return (
       <div className="mt-4 space-y-5">
-        <AdminField label="Título">
+        <AdminField label="TÃ­tulo">
           <input
             value={legal.title ?? ""}
             onChange={(event) =>
@@ -1401,6 +1631,14 @@ export default function AdminContentManager({
 
     if (item.section === "Promociones" && item.content_type === "json") {
       return renderPromotionsEditor(item);
+    }
+
+    if (
+      item.section === "Global" &&
+      item.label === "PÃ¡ginas de tratamiento" &&
+      item.content_type === "json"
+    ) {
+      return renderTreatmentPageEditor(item);
     }
 
     if (
@@ -1459,7 +1697,7 @@ export default function AdminContentManager({
 
       <section className="mx-auto max-w-7xl px-5 py-6">
         <div className="rounded-lg border border-[#ead1d9] bg-white p-4 text-sm leading-6 text-gray-600 shadow-sm">
-          Los cambios se guardan primero como borrador. La web pública solo
+          Los cambios se guardan primero como borrador. La web pÃºblica solo
           cambia cuando presionas Publicar.
         </div>
 
@@ -1551,7 +1789,7 @@ export default function AdminContentManager({
                         <Eye className="h-4 w-4" aria-hidden="true" />
                         {previewOpenIds.has(item.id)
                           ? "Ocultar vista previa"
-                          : "Ver antes/después"}
+                          : "Ver antes/despuÃ©s"}
                       </button>
 
                       <button
@@ -1594,7 +1832,6 @@ export default function AdminContentManager({
     </main>
   );
 }
-
 function AdminField({
   label,
   children,
@@ -1660,7 +1897,7 @@ function EditableList({
           ))
         ) : (
           <p className="rounded-lg border border-dashed border-[#ead1d9] bg-[#fffafb] px-4 py-3 text-sm text-gray-500">
-            No hay elementos todavía.
+            No hay elementos todavÃ­a.
           </p>
         )}
       </div>
@@ -1806,7 +2043,7 @@ function TextPairListEditor({
       <div className="mt-4 space-y-4">
         {items.map((item, index) => (
           <div key={index} className="rounded-lg bg-[#fffafb] p-4">
-            <AdminField label="Título">
+            <AdminField label="TÃ­tulo">
               <input
                 value={item.title}
                 onChange={(event) =>

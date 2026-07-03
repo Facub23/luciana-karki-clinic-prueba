@@ -163,6 +163,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
   const whatsappUrl = whatsappUrlFromPhone(phoneLabel);
   const phoneNumber = normalizePhoneForWhatsapp(phoneLabel);
   const siteSettings = getEditableSiteSettings(content);
+  const treatmentPageContent = siteSettings.treatmentPage;
   const editableTreatments = getEditableTreatments(content);
   const treatmentFaqContent = {
     ...siteSettings.treatmentFaq,
@@ -239,15 +240,13 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
 
           <div className="mt-10 rounded-[32px] bg-white p-8 shadow-sm">
             <span className="uppercase tracking-[0.25em] text-[#d9a8b5] text-xs">
-              Enfoque del tratamiento
+              {treatmentPageContent.approach.eyebrow}
             </span>
             <h2 className="mt-3 text-3xl font-light text-[#6b5b63]">
-              Indicación personalizada, resultado natural
+              {treatmentPageContent.approach.title}
             </h2>
             <p className="mt-5 max-w-3xl leading-8 text-gray-600">
-              Antes de tratar se revisa la zona, el objetivo estético y la
-              armonía general. Así se define una propuesta proporcionada,
-              realista y adaptada a tu caso.
+              {treatmentPageContent.approach.description}
             </p>
           </div>
 
@@ -255,11 +254,11 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
               <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
                 <div className="bg-[#fffafb] p-8 sm:p-10">
                   <span className="text-xs uppercase tracking-[0.28em] text-[#c98fa1]">
-                    Protocolo personalizado
+                    {treatmentPageContent.protocol.eyebrow}
                   </span>
 
                   <h2 className="mt-4 text-3xl font-light text-[#6b5b63] sm:text-4xl">
-                    Un plan diseñado para tu caso
+                    {treatmentPageContent.protocol.title}
                   </h2>
 
                   <p className="mt-5 leading-8 text-gray-600">
@@ -269,7 +268,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
                   <div className="mt-8 grid gap-4">
                     <div className="rounded-2xl border border-[#ead1d9] bg-white p-5">
                       <h3 className="font-medium text-[#6b5b63]">
-                        Cuidados posteriores
+                        {treatmentPageContent.protocol.careTitle}
                       </h3>
                       <p className="mt-3 text-sm leading-6 text-gray-600">
                         {pageDetails.care}
@@ -278,7 +277,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
 
                     <div className="rounded-2xl border border-[#ead1d9] bg-white p-5">
                       <h3 className="font-medium text-[#6b5b63]">
-                        Precauciones
+                        {treatmentPageContent.protocol.precautionsTitle}
                       </h3>
                       <p className="mt-3 text-sm leading-6 text-gray-600">
                         {pageDetails.precautions}
@@ -337,18 +336,14 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
 
           <section className="mt-14 rounded-[32px] bg-white p-8 shadow-sm">
             <span className="uppercase tracking-[0.25em] text-[#d9a8b5] text-xs">
-              Valoración previa
+              {treatmentPageContent.assessment.eyebrow}
             </span>
             <h2 className="mt-3 text-3xl font-light text-[#6b5b63]">
-              Qué revisamos antes de indicar el tratamiento
+              {treatmentPageContent.assessment.title}
             </h2>
 
             <div className="mt-8 grid gap-5 md:grid-cols-3">
-              {[
-                "Tus objetivos y expectativas",
-                "Proporciones y armonía facial o corporal",
-                "Plan recomendado, precio y próximos pasos",
-              ].map((item) => (
+              {treatmentPageContent.assessment.items.map((item) => (
                 <div key={item} className="flex gap-3">
                   <CheckCircle2
                     className="mt-0.5 h-5 w-5 shrink-0 text-[#d9a8b5]"
@@ -361,11 +356,11 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
           </section>
 
           <section className="mt-14 rounded-[32px] bg-[#6b5b63] p-8 text-white">
-            <h2 className="text-3xl font-light">Reserva con una valoración</h2>
+            <h2 className="text-3xl font-light">
+              {treatmentPageContent.closing.title}
+            </h2>
             <p className="mt-4 max-w-2xl leading-8 text-white/80">
-              Cada tratamiento se indica después de revisar tu caso, tus
-              objetivos y tu anatomía. La prioridad es un resultado natural,
-              seguro y coherente contigo.
+              {treatmentPageContent.closing.description}
             </p>
           </section>
         </div>
