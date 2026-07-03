@@ -2,9 +2,11 @@
 
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import {
   CheckCircle2,
   Eye,
+  FileImage,
   FileVideo,
   FolderOpen,
   History,
@@ -2274,21 +2276,31 @@ export default function AdminContentManager({
             <AdminNav />
           </div>
 
-          <form action="/api/admin/logout" method="post">
-            <button
-              type="submit"
+          <div className="flex flex-wrap gap-2">
+            <Link
+              href="/admin/medios"
               className="inline-flex items-center gap-2 rounded-lg border border-[#ead1d9] bg-white px-4 py-2 text-sm font-medium text-[#6b5b63] transition hover:bg-[#fff3f6]"
             >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
-              Salir
-            </button>
-          </form>
+              <FileImage className="h-4 w-4" aria-hidden="true" />
+              Biblioteca
+            </Link>
+
+            <form action="/api/admin/logout" method="post">
+              <button
+                type="submit"
+                className="inline-flex items-center gap-2 rounded-lg border border-[#ead1d9] bg-white px-4 py-2 text-sm font-medium text-[#6b5b63] transition hover:bg-[#fff3f6]"
+              >
+                <LogOut className="h-4 w-4" aria-hidden="true" />
+                Salir
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 
       <section className="mx-auto max-w-7xl px-5 py-6">
         <div className="rounded-lg border border-[#ead1d9] bg-white p-4 text-sm leading-6 text-gray-600 shadow-sm">
-          Los cambios se guardan primero como borrador. La web pÃºblica solo
+          Los cambios se guardan primero como borrador. La web pública solo
           cambia cuando presionas Publicar.
         </div>
 

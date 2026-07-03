@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   BarChart3,
   CalendarDays,
-  FileImage,
   FilePenLine,
   UserCog,
   Users,
@@ -10,10 +9,9 @@ import {
 
 const navItems = [
   { href: "/admin", label: "Leads", icon: Users },
-  { href: "/admin/metricas", label: "Métricas", icon: BarChart3 },
-  { href: "/admin/contenido", label: "Contenido", icon: FilePenLine },
-  { href: "/admin/medios", label: "Medios", icon: FileImage },
   { href: "/admin/reservas", label: "Reservas", icon: CalendarDays },
+  { href: "/admin/contenido", label: "Contenido", icon: FilePenLine },
+  { href: "/admin/metricas", label: "Métricas", icon: BarChart3 },
   { href: "/admin/usuarios", label: "Usuarios", icon: UserCog },
 ];
 
