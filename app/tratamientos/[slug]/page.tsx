@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import {
   CalendarDays,
@@ -237,6 +238,21 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
               {treatment.price}
             </span>
           </div>
+
+          {treatment.image ? (
+            <div className="mt-10 overflow-hidden rounded-[32px] border border-[#ead1d9] bg-white p-3 shadow-[0_18px_50px_rgba(107,91,99,0.12)]">
+              <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-[#fffafb] sm:aspect-[16/10]">
+                <Image
+                  src={treatment.image}
+                  alt={treatment.name}
+                  fill
+                  sizes="(min-width: 1024px) 760px, 100vw"
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </div>
+          ) : null}
 
           <div className="mt-10 rounded-[32px] bg-white p-8 shadow-sm">
             <span className="uppercase tracking-[0.25em] text-[#d9a8b5] text-xs">
