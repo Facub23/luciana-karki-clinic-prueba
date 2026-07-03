@@ -115,6 +115,28 @@ type EditableNavbarContent = {
   }[];
 };
 
+type EditableLeadFormContent = {
+  eyebrow?: string;
+  title?: string;
+  description?: string;
+  nameLabel?: string;
+  namePlaceholder?: string;
+  phoneLabel?: string;
+  phonePlaceholder?: string;
+  treatmentLabel?: string;
+  treatmentPlaceholder?: string;
+  submitLabel?: string;
+  submittingLabel?: string;
+  successMessage?: string;
+  errorMessage?: string;
+  fallbackTreatment?: string;
+  whatsappIntro?: string;
+  whatsappTreatmentPrefix?: string;
+  whatsappNamePrefix?: string;
+  whatsappPhonePrefix?: string;
+  whatsappClosing?: string;
+};
+
 type EditableContactContent = {
   eyebrow?: string;
   title?: string;
@@ -1562,6 +1584,219 @@ export default function AdminContentManager({
     );
   }
 
+  function renderLeadFormEditor(item: SiteContentRecord) {
+    const form = parseJsonValue<EditableLeadFormContent>(item.value, {});
+
+    function updateForm(nextValue: EditableLeadFormContent) {
+      updateDraft(item.id, stringifyJsonValue(nextValue));
+    }
+
+    function updateField(field: keyof EditableLeadFormContent, value: string) {
+      updateForm({ ...form, [field]: value });
+    }
+
+    return (
+      <div className="mt-4 space-y-6">
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">
+            Encabezado del formulario
+          </h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <AdminField label="Etiqueta superior">
+              <input
+                value={form.eyebrow ?? ""}
+                onChange={(event) => updateField("eyebrow", event.target.value)}
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Título">
+              <input
+                value={form.title ?? ""}
+                onChange={(event) => updateField("title", event.target.value)}
+                className="admin-content-input"
+              />
+            </AdminField>
+          </div>
+          <div className="mt-4">
+            <AdminField label="Descripción">
+              <textarea
+                value={form.description ?? ""}
+                onChange={(event) =>
+                  updateField("description", event.target.value)
+                }
+                className="admin-content-textarea min-h-24"
+              />
+            </AdminField>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">
+            Campos y botones
+          </h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <AdminField label="Label nombre">
+              <input
+                value={form.nameLabel ?? ""}
+                onChange={(event) => updateField("nameLabel", event.target.value)}
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Placeholder nombre">
+              <input
+                value={form.namePlaceholder ?? ""}
+                onChange={(event) =>
+                  updateField("namePlaceholder", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Label teléfono">
+              <input
+                value={form.phoneLabel ?? ""}
+                onChange={(event) => updateField("phoneLabel", event.target.value)}
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Placeholder teléfono">
+              <input
+                value={form.phonePlaceholder ?? ""}
+                onChange={(event) =>
+                  updateField("phonePlaceholder", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Label tratamiento">
+              <input
+                value={form.treatmentLabel ?? ""}
+                onChange={(event) =>
+                  updateField("treatmentLabel", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Placeholder tratamiento">
+              <input
+                value={form.treatmentPlaceholder ?? ""}
+                onChange={(event) =>
+                  updateField("treatmentPlaceholder", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Botón">
+              <input
+                value={form.submitLabel ?? ""}
+                onChange={(event) => updateField("submitLabel", event.target.value)}
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Botón cargando">
+              <input
+                value={form.submittingLabel ?? ""}
+                onChange={(event) =>
+                  updateField("submittingLabel", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">
+            Mensajes de estado
+          </h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <AdminField label="Mensaje correcto">
+              <textarea
+                value={form.successMessage ?? ""}
+                onChange={(event) =>
+                  updateField("successMessage", event.target.value)
+                }
+                className="admin-content-textarea min-h-24"
+              />
+            </AdminField>
+            <AdminField label="Mensaje error">
+              <textarea
+                value={form.errorMessage ?? ""}
+                onChange={(event) =>
+                  updateField("errorMessage", event.target.value)
+                }
+                className="admin-content-textarea min-h-24"
+              />
+            </AdminField>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">
+            Mensaje automático de WhatsApp
+          </h3>
+          <div className="mt-4 space-y-4">
+            <AdminField label="Tratamiento por defecto">
+              <input
+                value={form.fallbackTreatment ?? ""}
+                onChange={(event) =>
+                  updateField("fallbackTreatment", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+            <AdminField label="Primera línea">
+              <textarea
+                value={form.whatsappIntro ?? ""}
+                onChange={(event) =>
+                  updateField("whatsappIntro", event.target.value)
+                }
+                className="admin-content-textarea min-h-20"
+              />
+            </AdminField>
+            <div className="grid gap-4 md:grid-cols-3">
+              <AdminField label="Prefijo tratamiento">
+                <input
+                  value={form.whatsappTreatmentPrefix ?? ""}
+                  onChange={(event) =>
+                    updateField("whatsappTreatmentPrefix", event.target.value)
+                  }
+                  className="admin-content-input"
+                />
+              </AdminField>
+              <AdminField label="Prefijo nombre">
+                <input
+                  value={form.whatsappNamePrefix ?? ""}
+                  onChange={(event) =>
+                    updateField("whatsappNamePrefix", event.target.value)
+                  }
+                  className="admin-content-input"
+                />
+              </AdminField>
+              <AdminField label="Prefijo teléfono">
+                <input
+                  value={form.whatsappPhonePrefix ?? ""}
+                  onChange={(event) =>
+                    updateField("whatsappPhonePrefix", event.target.value)
+                  }
+                  className="admin-content-input"
+                />
+              </AdminField>
+            </div>
+            <AdminField label="Cierre">
+              <textarea
+                value={form.whatsappClosing ?? ""}
+                onChange={(event) =>
+                  updateField("whatsappClosing", event.target.value)
+                }
+                className="admin-content-textarea min-h-20"
+              />
+            </AdminField>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   function renderFooterEditor(item: SiteContentRecord) {
     const footer = parseJsonValue<EditableFooterContent>(item.value, {});
 
@@ -1979,6 +2214,14 @@ export default function AdminContentManager({
       item.content_type === "json"
     ) {
       return renderNavbarEditor(item);
+    }
+
+    if (
+      item.section === "Global" &&
+      item.label === "Formulario de leads" &&
+      item.content_type === "json"
+    ) {
+      return renderLeadFormEditor(item);
     }
 
     if (

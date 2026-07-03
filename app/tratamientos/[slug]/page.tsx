@@ -370,6 +370,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
             compact
             treatmentName={treatment.name}
             phoneNumber={phoneNumber}
+            content={siteSettings.leadForm}
           />
         </div>
       </section>

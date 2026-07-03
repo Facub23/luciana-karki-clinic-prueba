@@ -3,11 +3,16 @@
 import { FormEvent, useMemo, useState } from "react";
 import { Loader2, MessageCircle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import {
+  defaultLeadFormContent,
+  type LeadFormContent,
+} from "@/lib/public-site-settings";
 
 type LeadFormProps = {
   treatmentName?: string;
   compact?: boolean;
   phoneNumber?: string;
+  content?: LeadFormContent;
 };
 
 const defaultPhoneNumber = "34644241706";
@@ -30,6 +35,7 @@ export default function LeadForm({
   treatmentName,
   compact = false,
   phoneNumber = defaultPhoneNumber,
+  content = defaultLeadFormContent,
 }: LeadFormProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -37,19 +43,18 @@ export default function LeadForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
 
+  const selectedTreatment = interest || treatmentName || content.fallbackTreatment;
   const message = useMemo(() => {
-    const selectedTreatment = interest || treatmentName || "una valoración";
-
     return [
-      "Hola, quiero solicitar una valoración médica con la Dra. Luciana Karki Martín.",
-      `Me interesa: ${selectedTreatment}`,
-      name ? `Nombre: ${name}` : "",
-      phone ? `Teléfono: ${phone}` : "",
-      "Quedo pendiente para coordinar disponibilidad. Gracias.",
+      content.whatsappIntro,
+      `${content.whatsappTreatmentPrefix} ${selectedTreatment}`,
+      name ? `${content.whatsappNamePrefix} ${name}` : "",
+      phone ? `${content.whatsappPhonePrefix} ${phone}` : "",
+      content.whatsappClosing,
     ]
       .filter(Boolean)
       .join("\n");
-  }, [interest, name, phone, treatmentName]);
+  }, [content, name, phone, selectedTreatment]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,7 +72,7 @@ export default function LeadForm({
         body: JSON.stringify({
           name,
           phone,
-          treatment: interest || treatmentName || "Valoración",
+          treatment: selectedTreatment,
           page: window.location.pathname,
           message,
           website: formData.get("website"),
@@ -79,7 +84,7 @@ export default function LeadForm({
 
       trackEvent("lead_form_submit", {
         status: response.ok ? "saved" : "error",
-        treatment: interest || treatmentName || "Valoración",
+        treatment: selectedTreatment,
         page: window.location.pathname,
       });
     } catch {
@@ -87,7 +92,7 @@ export default function LeadForm({
 
       trackEvent("lead_form_submit", {
         status: "error",
-        treatment: interest || treatmentName || "Valoración",
+        treatment: selectedTreatment,
         page: window.location.pathname,
       });
     } finally {
@@ -96,7 +101,7 @@ export default function LeadForm({
 
     trackEvent("whatsapp_click", {
       location: compact ? "compact_lead_form" : "lead_form",
-      treatment: interest || treatmentName || "Valoración",
+      treatment: selectedTreatment,
       page: window.location.pathname,
     });
 
@@ -116,21 +121,21 @@ export default function LeadForm({
     >
       <div>
         <span className="text-xs uppercase tracking-[0.25em] text-[#d9a8b5]">
-          Valoración
+          {content.eyebrow}
         </span>
         <h3
           className={`font-light text-[#6b5b63] ${
             compact ? "mt-1 text-xl" : "mt-3 text-2xl"
           }`}
         >
-          Reserva tu consulta
+          {content.title}
         </h3>
         <p
           className={`text-sm leading-6 text-gray-600 ${
             compact ? "mt-1 hidden sm:block" : "mt-3"
           }`}
         >
-          Completa tus datos y abre WhatsApp con el mensaje listo para reservar.
+          {content.description}
         </p>
       </div>
 
@@ -141,7 +146,7 @@ export default function LeadForm({
       >
         <label className="block">
           <span className={compact ? "sr-only" : "text-sm text-[#6b5b63]"}>
-            Nombre
+            {content.nameLabel}
           </span>
           <input
             value={name}
@@ -151,7 +156,7 @@ export default function LeadForm({
                 ? "rounded-xl py-2.5 text-sm"
                 : "mt-2 rounded-2xl py-3"
             }`}
-            placeholder="Tu nombre"
+            placeholder={content.namePlaceholder}
             type="text"
             required
           />
@@ -159,7 +164,7 @@ export default function LeadForm({
 
         <label className="block">
           <span className={compact ? "sr-only" : "text-sm text-[#6b5b63]"}>
-            Teléfono
+            {content.phoneLabel}
           </span>
           <input
             value={phone}
@@ -169,7 +174,7 @@ export default function LeadForm({
                 ? "rounded-xl py-2.5 text-sm"
                 : "mt-2 rounded-2xl py-3"
             }`}
-            placeholder="+34..."
+            placeholder={content.phonePlaceholder}
             type="tel"
             required
           />
@@ -177,7 +182,7 @@ export default function LeadForm({
 
         <label className={compact ? "block sm:col-span-2" : "block"}>
           <span className={compact ? "sr-only" : "text-sm text-[#6b5b63]"}>
-            Tratamiento
+            {content.treatmentLabel}
           </span>
           <input
             value={interest}
@@ -187,7 +192,7 @@ export default function LeadForm({
                 ? "rounded-xl py-2.5 text-sm"
                 : "mt-2 rounded-2xl py-3"
             }`}
-            placeholder="Tratamiento que te interesa"
+            placeholder={content.treatmentPlaceholder}
             type="text"
           />
         </label>
@@ -213,19 +218,15 @@ export default function LeadForm({
         ) : (
           <MessageCircle className="h-5 w-5" aria-hidden="true" />
         )}
-        {isSubmitting ? "Guardando..." : "Enviar por WhatsApp"}
+        {isSubmitting ? content.submittingLabel : content.submitLabel}
       </button>
 
       {status === "saved" ? (
-        <p className="mt-3 text-sm text-green-700">
-          Solicitud registrada. Se abrirá WhatsApp para continuar.
-        </p>
+        <p className="mt-3 text-sm text-green-700">{content.successMessage}</p>
       ) : null}
 
       {status === "error" ? (
-        <p className="mt-3 text-sm text-amber-700">
-          WhatsApp se abrirá igual. Revisaremos la conexión del registro luego.
-        </p>
+        <p className="mt-3 text-sm text-amber-700">{content.errorMessage}</p>
       ) : null}
     </form>
   );

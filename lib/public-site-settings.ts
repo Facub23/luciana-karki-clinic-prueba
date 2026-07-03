@@ -17,6 +17,28 @@ export type NavbarContent = {
   }[];
 };
 
+export type LeadFormContent = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  nameLabel: string;
+  namePlaceholder: string;
+  phoneLabel: string;
+  phonePlaceholder: string;
+  treatmentLabel: string;
+  treatmentPlaceholder: string;
+  submitLabel: string;
+  submittingLabel: string;
+  successMessage: string;
+  errorMessage: string;
+  fallbackTreatment: string;
+  whatsappIntro: string;
+  whatsappTreatmentPrefix: string;
+  whatsappNamePrefix: string;
+  whatsappPhonePrefix: string;
+  whatsappClosing: string;
+};
+
 export type FooterContent = {
   brandName: string;
   description: string;
@@ -68,6 +90,31 @@ export const defaultNavbarContent: NavbarContent = {
     { label: "Sobre mí", href: "/#sobre" },
     { label: "Contacto", href: "/#contacto" },
   ],
+};
+
+export const defaultLeadFormContent: LeadFormContent = {
+  eyebrow: "Valoración",
+  title: "Reserva tu consulta",
+  description:
+    "Completa tus datos y abre WhatsApp con el mensaje listo para reservar.",
+  nameLabel: "Nombre",
+  namePlaceholder: "Tu nombre",
+  phoneLabel: "Teléfono",
+  phonePlaceholder: "+34...",
+  treatmentLabel: "Tratamiento",
+  treatmentPlaceholder: "Tratamiento que te interesa",
+  submitLabel: "Enviar por WhatsApp",
+  submittingLabel: "Guardando...",
+  successMessage: "Solicitud registrada. Se abrirá WhatsApp para continuar.",
+  errorMessage:
+    "WhatsApp se abrirá igual. Revisaremos la conexión del registro luego.",
+  fallbackTreatment: "una valoración",
+  whatsappIntro:
+    "Hola, quiero solicitar una valoración médica con la Dra. Luciana Karki Martín.",
+  whatsappTreatmentPrefix: "Me interesa:",
+  whatsappNamePrefix: "Nombre:",
+  whatsappPhonePrefix: "Teléfono:",
+  whatsappClosing: "Quedo pendiente para coordinar disponibilidad. Gracias.",
 };
 
 export const defaultFooterContent: FooterContent = {
@@ -172,6 +219,10 @@ export function getEditableSiteSettings(content: PublicSiteContent) {
     getPublicContentValue(content, "Global", "Navegación principal", ""),
     defaultNavbarContent,
   );
+  const leadForm = parseSetting(
+    getPublicContentValue(content, "Global", "Formulario de leads", ""),
+    defaultLeadFormContent,
+  );
   const footer = parseSetting(
     getPublicContentValue(content, "Footer", "Contenido", ""),
     defaultFooterContent,
@@ -193,7 +244,15 @@ export function getEditableSiteSettings(content: PublicSiteContent) {
     defaultTreatmentPageContent,
   );
 
-  return { navbar, footer, contact, treatmentFaq, trustSignals, treatmentPage };
+  return {
+    navbar,
+    leadForm,
+    footer,
+    contact,
+    treatmentFaq,
+    trustSignals,
+    treatmentPage,
+  };
 }
 
 export function getSiteSettingsDefaults() {
@@ -204,6 +263,14 @@ export function getSiteSettingsDefaults() {
       content_type: "json" as const,
       value: serializeSetting(defaultNavbarContent),
       description: "Marca, enlaces y botón principal del menú superior.",
+    },
+    {
+      section: "Global",
+      label: "Formulario de leads",
+      content_type: "json" as const,
+      value: serializeSetting(defaultLeadFormContent),
+      description:
+        "Textos del formulario y plantilla del mensaje automático de WhatsApp.",
     },
     {
       section: "Footer",

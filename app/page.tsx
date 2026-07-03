@@ -120,6 +120,7 @@ export default async function Home() {
         content={editableHomeContent.hero}
         whatsappUrl={whatsappUrl}
         phoneNumber={normalizePhoneForWhatsapp(phoneLabel)}
+        leadFormContent={siteSettings.leadForm}
       />
 
       <Results content={editableHomeContent.results} />

@@ -1,6 +1,7 @@
 import Image from "next/image";
 import LeadForm from "@/components/LeadForm";
 import TrackedAnchor from "@/components/TrackedAnchor";
+import type { LeadFormContent } from "@/lib/public-site-settings";
 
 export type HeroContent = {
   eyebrow: string;
@@ -35,19 +36,25 @@ type HeroProps = {
   content?: HeroContent;
   whatsappUrl?: string;
   phoneNumber?: string;
+  leadFormContent?: LeadFormContent;
 };
 
 export default function Hero({
   content = defaultHeroContent,
   whatsappUrl = "https://wa.me/34644241706",
   phoneNumber = "34644241706",
+  leadFormContent,
 }: HeroProps) {
   return (
     <section id="inicio" className="mx-auto max-w-7xl px-6 py-16 lg:py-24">
       <div className="grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
         <div className="flex flex-col">
           <div className="max-w-xl">
-            <LeadForm compact phoneNumber={phoneNumber} />
+            <LeadForm
+              compact
+              phoneNumber={phoneNumber}
+              content={leadFormContent}
+            />
           </div>
 
           <div className="mt-8 lg:mt-10">
