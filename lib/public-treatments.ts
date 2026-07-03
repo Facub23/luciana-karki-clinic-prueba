@@ -9,6 +9,10 @@ type TreatmentOverride = Partial<
   details?: Treatment["details"];
 };
 
+const treatmentSlugAliases: Record<string, string> = {
+  labios: "labios-acido-hialuronico",
+};
+
 function parseTreatmentOverride(value: string, slug: string) {
   if (!value.trim()) {
     return {};
@@ -70,7 +74,8 @@ export function getEditableTreatmentBySlug(
   slug: string,
   content: PublicSiteContent,
 ) {
-  const treatment = treatments.find((item) => item.slug === slug);
+  const normalizedSlug = treatmentSlugAliases[slug] ?? slug;
+  const treatment = treatments.find((item) => item.slug === normalizedSlug);
 
   if (!treatment) {
     return undefined;
