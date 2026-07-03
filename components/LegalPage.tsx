@@ -2,7 +2,7 @@ import Link from "next/link";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import WhatsappButton from "@/components/WhatsappButton";
-import type { FooterContent } from "@/lib/public-site-settings";
+import type { FooterContent, NavbarContent } from "@/lib/public-site-settings";
 import type { Treatment } from "@/lib/treatments";
 
 type LegalPageProps = {
@@ -10,6 +10,7 @@ type LegalPageProps = {
   body: string;
   phoneLabel: string;
   whatsappUrl: string;
+  navbarContent: NavbarContent;
   footerContent: FooterContent;
   treatments: Treatment[];
 };
@@ -19,12 +20,13 @@ export default function LegalPage({
   body,
   phoneLabel,
   whatsappUrl,
+  navbarContent,
   footerContent,
   treatments,
 }: LegalPageProps) {
   return (
     <main className="min-h-screen bg-gradient-to-b from-white via-[#faf7f8] to-white">
-      <Navbar whatsappUrl={whatsappUrl} />
+      <Navbar whatsappUrl={whatsappUrl} content={navbarContent} />
 
       <section className="mx-auto max-w-4xl px-6 py-20">
         <Link href="/" className="text-sm font-medium text-[#c98fa1]">

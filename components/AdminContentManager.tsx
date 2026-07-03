@@ -89,6 +89,18 @@ type EditableFooterContent = {
   copyright?: string;
 };
 
+type EditableNavbarContent = {
+  brandShort?: string;
+  brandFull?: string;
+  specialty?: string;
+  ctaMobile?: string;
+  ctaDesktop?: string;
+  links?: {
+    label: string;
+    href: string;
+  }[];
+};
+
 type EditableContactContent = {
   eyebrow?: string;
   title?: string;
@@ -1230,6 +1242,142 @@ export default function AdminContentManager({
     );
   }
 
+  function renderNavbarEditor(item: SiteContentRecord) {
+    const navbar = parseJsonValue<EditableNavbarContent>(item.value, {});
+
+    function updateNavbar(nextValue: EditableNavbarContent) {
+      updateDraft(item.id, stringifyJsonValue(nextValue));
+    }
+
+    function updateField(field: keyof EditableNavbarContent, value: string) {
+      updateNavbar({ ...navbar, [field]: value });
+    }
+
+    function updateLink(
+      index: number,
+      field: "label" | "href",
+      value: string,
+    ) {
+      const links = [...(navbar.links ?? [])];
+      links[index] = {
+        ...(links[index] ?? { label: "", href: "" }),
+        [field]: value,
+      };
+      updateNavbar({ ...navbar, links });
+    }
+
+    return (
+      <div className="mt-4 space-y-5">
+        <div className="grid gap-4 md:grid-cols-2">
+          <AdminField label="Marca móvil">
+            <input
+              value={navbar.brandShort ?? ""}
+              onChange={(event) => updateField("brandShort", event.target.value)}
+              className="admin-content-input"
+            />
+          </AdminField>
+
+          <AdminField label="Marca escritorio">
+            <input
+              value={navbar.brandFull ?? ""}
+              onChange={(event) => updateField("brandFull", event.target.value)}
+              className="admin-content-input"
+            />
+          </AdminField>
+
+          <AdminField label="Especialidad">
+            <input
+              value={navbar.specialty ?? ""}
+              onChange={(event) => updateField("specialty", event.target.value)}
+              className="admin-content-input"
+            />
+          </AdminField>
+
+          <AdminField label="Botón móvil">
+            <input
+              value={navbar.ctaMobile ?? ""}
+              onChange={(event) => updateField("ctaMobile", event.target.value)}
+              className="admin-content-input"
+            />
+          </AdminField>
+
+          <AdminField label="Botón escritorio">
+            <input
+              value={navbar.ctaDesktop ?? ""}
+              onChange={(event) => updateField("ctaDesktop", event.target.value)}
+              className="admin-content-input"
+            />
+          </AdminField>
+        </div>
+
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-sm font-semibold text-[#5f4d56]">
+              Enlaces del menú
+            </h3>
+            <button
+              type="button"
+              onClick={() =>
+                updateNavbar({
+                  ...navbar,
+                  links: [...(navbar.links ?? []), { label: "Nuevo", href: "/" }],
+                })
+              }
+              className="inline-flex items-center gap-2 rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-xs font-semibold text-[#6b5b63] transition hover:bg-[#fff3f6]"
+            >
+              <Plus className="h-4 w-4" aria-hidden="true" />
+              Agregar enlace
+            </button>
+          </div>
+
+          <div className="mt-4 space-y-3">
+            {(navbar.links ?? []).map((link, index) => (
+              <div
+                key={`${link.href}-${index}`}
+                className="grid gap-3 rounded-lg bg-[#fffafb] p-3 md:grid-cols-[1fr_1fr_auto]"
+              >
+                <AdminField label="Texto">
+                  <input
+                    value={link.label}
+                    onChange={(event) =>
+                      updateLink(index, "label", event.target.value)
+                    }
+                    className="admin-content-input"
+                  />
+                </AdminField>
+
+                <AdminField label="Destino">
+                  <input
+                    value={link.href}
+                    onChange={(event) =>
+                      updateLink(index, "href", event.target.value)
+                    }
+                    className="admin-content-input"
+                  />
+                </AdminField>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    updateNavbar({
+                      ...navbar,
+                      links: (navbar.links ?? []).filter(
+                        (_, itemIndex) => itemIndex !== index,
+                      ),
+                    })
+                  }
+                  className="mt-6 inline-flex items-center justify-center rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-50"
+                >
+                  <Trash2 className="h-4 w-4" aria-hidden="true" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   function renderFooterEditor(item: SiteContentRecord) {
     const footer = parseJsonValue<EditableFooterContent>(item.value, {});
 
@@ -1635,7 +1783,15 @@ export default function AdminContentManager({
 
     if (
       item.section === "Global" &&
-      item.label === "PÃ¡ginas de tratamiento" &&
+      item.label === "Navegación principal" &&
+      item.content_type === "json"
+    ) {
+      return renderNavbarEditor(item);
+    }
+
+    if (
+      item.section === "Global" &&
+      item.label === "Páginas de tratamiento" &&
       item.content_type === "json"
     ) {
       return renderTreatmentPageEditor(item);

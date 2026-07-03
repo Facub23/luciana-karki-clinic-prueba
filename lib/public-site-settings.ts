@@ -5,6 +5,18 @@ import {
   type TrustSignalsContent,
 } from "@/components/TrustSignals";
 
+export type NavbarContent = {
+  brandShort: string;
+  brandFull: string;
+  specialty: string;
+  ctaMobile: string;
+  ctaDesktop: string;
+  links: {
+    label: string;
+    href: string;
+  }[];
+};
+
 export type FooterContent = {
   brandName: string;
   description: string;
@@ -42,6 +54,20 @@ export type TreatmentPageContent = {
     title: string;
     description: string;
   };
+};
+
+export const defaultNavbarContent: NavbarContent = {
+  brandShort: "Dra. Luciana",
+  brandFull: "Dra. Luciana Karki Martín",
+  specialty: "Medicina estética",
+  ctaMobile: "Cita",
+  ctaDesktop: "Reservar cita",
+  links: [
+    { label: "Inicio", href: "/#inicio" },
+    { label: "Tratamientos", href: "/#tratamientos" },
+    { label: "Sobre mí", href: "/#sobre" },
+    { label: "Contacto", href: "/#contacto" },
+  ],
 };
 
 export const defaultFooterContent: FooterContent = {
@@ -142,6 +168,10 @@ export function applyTreatmentTemplate(text: string, treatmentName: string) {
 }
 
 export function getEditableSiteSettings(content: PublicSiteContent) {
+  const navbar = parseSetting(
+    getPublicContentValue(content, "Global", "Navegación principal", ""),
+    defaultNavbarContent,
+  );
   const footer = parseSetting(
     getPublicContentValue(content, "Footer", "Contenido", ""),
     defaultFooterContent,
@@ -163,11 +193,18 @@ export function getEditableSiteSettings(content: PublicSiteContent) {
     defaultTreatmentPageContent,
   );
 
-  return { footer, contact, treatmentFaq, trustSignals, treatmentPage };
+  return { navbar, footer, contact, treatmentFaq, trustSignals, treatmentPage };
 }
 
 export function getSiteSettingsDefaults() {
   return [
+    {
+      section: "Global",
+      label: "Navegación principal",
+      content_type: "json" as const,
+      value: serializeSetting(defaultNavbarContent),
+      description: "Marca, enlaces y botón principal del menú superior.",
+    },
     {
       section: "Footer",
       label: "Contenido",

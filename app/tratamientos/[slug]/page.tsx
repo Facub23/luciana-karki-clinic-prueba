@@ -203,7 +203,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
           },
         ])}
       />
-      <Navbar whatsappUrl={whatsappUrl} />
+      <Navbar whatsappUrl={whatsappUrl} content={siteSettings.navbar} />
 
       <section className="max-w-7xl mx-auto grid gap-12 px-6 py-20 lg:grid-cols-[1fr_420px] lg:items-start">
         <div>

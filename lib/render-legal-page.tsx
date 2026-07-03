@@ -31,6 +31,7 @@ export async function renderLegalPage(slug: LegalPageSlug) {
       body={legalContent.body}
       phoneLabel={phoneLabel}
       whatsappUrl={whatsappUrl}
+      navbarContent={siteSettings.navbar}
       footerContent={siteSettings.footer}
       treatments={treatments}
     />

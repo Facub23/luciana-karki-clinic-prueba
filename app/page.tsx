@@ -113,7 +113,7 @@ export default async function Home() {
       <JsonLd data={websiteJsonLd()} />
       <JsonLd data={homePageJsonLd(title, description)} />
       <JsonLd data={faqJsonLd(editableHomeContent.faq.items)} />
-      <Navbar whatsappUrl={whatsappUrl} />
+      <Navbar whatsappUrl={whatsappUrl} content={siteSettings.navbar} />
 
       <Hero content={content} />
 
