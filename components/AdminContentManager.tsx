@@ -81,6 +81,20 @@ type EditableStructuredBlock = {
   }[];
 };
 
+type EditableHeroContent = {
+  eyebrow?: string;
+  title?: string;
+  doctor?: string;
+  description?: string;
+  primaryCta?: string;
+  secondaryCta?: string;
+  secondaryHref?: string;
+  image?: string;
+  imageAlt?: string;
+  floatingTitle?: string;
+  floatingText?: string;
+};
+
 type EditableFooterContent = {
   brandName?: string;
   description?: string;
@@ -1242,6 +1256,176 @@ export default function AdminContentManager({
     );
   }
 
+  function renderHeroEditor(item: SiteContentRecord) {
+    const hero = parseJsonValue<EditableHeroContent>(item.value, {});
+
+    function updateHero(nextValue: EditableHeroContent) {
+      updateDraft(item.id, stringifyJsonValue(nextValue));
+    }
+
+    function updateField(field: keyof EditableHeroContent, value: string) {
+      updateHero({ ...hero, [field]: value });
+    }
+
+    return (
+      <div className="mt-4 space-y-6">
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">
+            Texto principal
+          </h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <AdminField label="Ubicación / etiqueta">
+              <input
+                value={hero.eyebrow ?? ""}
+                onChange={(event) => updateField("eyebrow", event.target.value)}
+                className="admin-content-input"
+              />
+            </AdminField>
+
+            <AdminField label="Nombre doctora">
+              <input
+                value={hero.doctor ?? ""}
+                onChange={(event) => updateField("doctor", event.target.value)}
+                className="admin-content-input"
+              />
+            </AdminField>
+          </div>
+
+          <div className="mt-4">
+            <AdminField label="Título principal">
+              <textarea
+                value={hero.title ?? ""}
+                onChange={(event) => updateField("title", event.target.value)}
+                className="admin-content-textarea min-h-24"
+              />
+            </AdminField>
+          </div>
+
+          <div className="mt-4">
+            <AdminField label="Descripción">
+              <textarea
+                value={hero.description ?? ""}
+                onChange={(event) =>
+                  updateField("description", event.target.value)
+                }
+                className="admin-content-textarea min-h-28"
+              />
+            </AdminField>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">Botones</h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-3">
+            <AdminField label="Botón principal">
+              <input
+                value={hero.primaryCta ?? ""}
+                onChange={(event) => updateField("primaryCta", event.target.value)}
+                className="admin-content-input"
+              />
+            </AdminField>
+
+            <AdminField label="Botón secundario">
+              <input
+                value={hero.secondaryCta ?? ""}
+                onChange={(event) =>
+                  updateField("secondaryCta", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+
+            <AdminField label="Destino secundario">
+              <input
+                value={hero.secondaryHref ?? ""}
+                onChange={(event) =>
+                  updateField("secondaryHref", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">Imagen</h3>
+          <div className="mt-4 grid gap-4 lg:grid-cols-[220px_1fr]">
+            <div className="overflow-hidden rounded-lg border border-[#ead1d9] bg-[#fffafb]">
+              {hero.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={hero.image}
+                  alt={hero.imageAlt ?? ""}
+                  className="aspect-[4/5] w-full object-cover"
+                />
+              ) : (
+                <div className="flex aspect-[4/5] items-center justify-center text-sm text-gray-500">
+                  Sin imagen
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <AdminField label="Imagen principal">
+                <input
+                  value={hero.image ?? ""}
+                  onChange={(event) => updateField("image", event.target.value)}
+                  className="admin-content-input"
+                />
+              </AdminField>
+
+              <div className="flex flex-wrap gap-2">
+                <MediaPickerButton
+                  accept="image/*"
+                  onSelect={(asset) => updateField("image", asset.url)}
+                />
+                <UploadButton
+                  accept="image/*"
+                  onUploaded={(url) => updateField("image", url)}
+                />
+              </div>
+
+              <AdminField label="Texto alternativo">
+                <input
+                  value={hero.imageAlt ?? ""}
+                  onChange={(event) => updateField("imageAlt", event.target.value)}
+                  className="admin-content-input"
+                />
+              </AdminField>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-[#ead1d9] bg-white p-4">
+          <h3 className="text-sm font-semibold text-[#5f4d56]">
+            Tarjeta sobre imagen
+          </h3>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <AdminField label="Título tarjeta">
+              <input
+                value={hero.floatingTitle ?? ""}
+                onChange={(event) =>
+                  updateField("floatingTitle", event.target.value)
+                }
+                className="admin-content-input"
+              />
+            </AdminField>
+
+            <AdminField label="Texto tarjeta">
+              <textarea
+                value={hero.floatingText ?? ""}
+                onChange={(event) =>
+                  updateField("floatingText", event.target.value)
+                }
+                className="admin-content-textarea min-h-24"
+              />
+            </AdminField>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   function renderNavbarEditor(item: SiteContentRecord) {
     const navbar = parseJsonValue<EditableNavbarContent>(item.value, {});
 
@@ -1779,6 +1963,14 @@ export default function AdminContentManager({
 
     if (item.section === "Promociones" && item.content_type === "json") {
       return renderPromotionsEditor(item);
+    }
+
+    if (
+      item.section === "Home" &&
+      item.label === "Hero / Inicio" &&
+      item.content_type === "json"
+    ) {
+      return renderHeroEditor(item);
     }
 
     if (

@@ -27,6 +27,7 @@ import {
 import {
   getPublicContentValue,
   getPublicSiteContent,
+  normalizePhoneForWhatsapp,
   phoneLabelFromContent,
   publicContentFallbacks,
   whatsappUrlFromPhone,
@@ -115,7 +116,11 @@ export default async function Home() {
       <JsonLd data={faqJsonLd(editableHomeContent.faq.items)} />
       <Navbar whatsappUrl={whatsappUrl} content={siteSettings.navbar} />
 
-      <Hero content={content} />
+      <Hero
+        content={editableHomeContent.hero}
+        whatsappUrl={whatsappUrl}
+        phoneNumber={normalizePhoneForWhatsapp(phoneLabel)}
+      />
 
       <Results content={editableHomeContent.results} />
 

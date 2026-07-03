@@ -15,8 +15,10 @@ import {
   type BookingBlockContent,
 } from "@/components/BookingProcess";
 import { defaultAboutContent, type AboutBlockContent } from "@/components/About";
+import { defaultHeroContent, type HeroContent } from "@/components/Hero";
 
 export type EditableHomeBlock =
+  | HeroContent
   | CardsBlockContent
   | IconCardsBlockContent
   | VideoBlockContent
@@ -53,6 +55,7 @@ export function serializeHomeBlockForAdmin(value: EditableHomeBlock) {
 
 export function getEditableHomeContent(content: PublicSiteContent) {
   return {
+    hero: getBlock(content, "Home", "Hero / Inicio", defaultHeroContent),
     results: getBlock(
       content,
       "Home",
@@ -80,6 +83,14 @@ export function getEditableHomeContent(content: PublicSiteContent) {
 
 export function getHomeContentDefaults() {
   return [
+    {
+      section: "Home",
+      label: "Hero / Inicio",
+      content_type: "json" as const,
+      value: serializeHomeBlockForAdmin(defaultHeroContent),
+      description:
+        "Primera pantalla: texto, botones, imagen principal y tarjeta flotante.",
+    },
     {
       section: "Home",
       label: "Filosofía y resultados",
