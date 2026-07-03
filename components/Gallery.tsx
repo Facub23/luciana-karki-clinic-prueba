@@ -12,7 +12,7 @@ export default function Gallery({ promotions = defaultPromotions }: GalleryProps
   return (
     <section className="bg-white py-20 lg:py-28">
       <div className="mx-auto max-w-7xl px-6">
-        <div className="mx-auto mb-14 max-w-3xl text-center">
+        <div className="mx-auto mb-12 max-w-3xl text-center">
           <span className="text-sm uppercase tracking-[0.3em] text-[#d9a8b5]">
             Promociones
           </span>
@@ -20,11 +20,6 @@ export default function Gallery({ promotions = defaultPromotions }: GalleryProps
           <h2 className="mt-4 text-4xl font-light text-[#6b5b63] sm:text-5xl">
             Campañas destacadas
           </h2>
-
-          <p className="mt-5 text-lg leading-8 text-gray-600">
-            Piezas informativas para campañas y redes. Las condiciones finales
-            se confirman siempre durante la valoración.
-          </p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
