@@ -1,4 +1,5 @@
 export type AnalyticsEventName =
+  | "generate_lead"
   | "lead_form_submit"
   | "whatsapp_click"
   | "treatment_interest"

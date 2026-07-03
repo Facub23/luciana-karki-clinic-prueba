@@ -87,6 +87,14 @@ export default function LeadForm({
         treatment: selectedTreatment,
         page: window.location.pathname,
       });
+
+      if (response.ok) {
+        trackEvent("generate_lead", {
+          method: "lead_form",
+          treatment: selectedTreatment,
+          page: window.location.pathname,
+        });
+      }
     } catch {
       setStatus("error");
 
