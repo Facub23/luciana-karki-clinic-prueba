@@ -255,7 +255,11 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
                 {treatmentImages.map((image, index) => (
                   <div
                     key={`${image.src}-${index}`}
-                    className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-[#fffafb]"
+                    className={`relative overflow-hidden rounded-[24px] bg-[#f7eef1] ${
+                      treatmentImages.length > 1
+                        ? "aspect-[4/5]"
+                        : "aspect-[5/4]"
+                    }`}
                   >
                     <Image
                       src={image.src}
@@ -266,7 +270,7 @@ export default async function TreatmentPage({ params }: TreatmentPageProps) {
                           ? "(min-width: 1024px) 380px, 100vw"
                           : "(min-width: 1024px) 760px, 100vw"
                       }
-                      className="object-cover"
+                      className="object-contain"
                       priority={index === 0}
                     />
                   </div>

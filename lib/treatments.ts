@@ -67,7 +67,7 @@ export const treatments: Treatment[] = [
       precautions:
         "No se indica durante embarazo, lactancia o determinadas condiciones neuromusculares. Siempre se confirma en valoración médica.",
     },
-    image: "/images/tratamiento-1.jpeg",
+    image: "/images/tratamiento-neuromoduladores-foto.jpeg",
   },
   {
     slug: "bruxismo",
@@ -106,7 +106,7 @@ export const treatments: Treatment[] = [
       precautions:
         "La indicación se confirma tras valorar mordida, musculatura, antecedentes y síntomas asociados.",
     },
-    image: "/images/tratamiento-2.jpeg",
+    image: "/images/tratamiento-facial-foto.jpeg",
   },
   {
     slug: "hiperhidrosis",
@@ -144,7 +144,7 @@ export const treatments: Treatment[] = [
       precautions:
         "Se confirma la indicación en consulta y se revisan antecedentes médicos antes del tratamiento.",
     },
-    image: "/images/tratamiento-3.jpeg",
+    image: "/images/peeling-axilas-1.png",
   },
   {
     slug: "peeling-despigmentante-corporal",
@@ -229,7 +229,7 @@ export const treatments: Treatment[] = [
       precautions:
         "No se realiza con infección activa, herpes sin controlar o contraindicaciones médicas relevantes.",
     },
-    image: "/images/tratamiento-1.jpeg",
+    image: "/images/tratamiento-labios-foto.jpeg",
   },
   {
     slug: "rinomodelacion",
@@ -268,7 +268,7 @@ export const treatments: Treatment[] = [
       precautions:
         "Requiere valoración médica cuidadosa por tratarse de una zona vascularmente delicada.",
     },
-    image: "/images/tratamiento-2.jpeg",
+    image: "/images/tratamiento-facial-foto.jpeg",
   },
   {
     slug: "rinolips",
@@ -307,7 +307,7 @@ export const treatments: Treatment[] = [
       precautions:
         "Se valora cada zona por separado antes de combinar el tratamiento, especialmente la seguridad nasal.",
     },
-    image: "/images/tratamiento-3.jpeg",
+    image: "/images/tratamiento-labios-foto.jpeg",
   },
   {
     slug: "pomulos",
@@ -346,7 +346,7 @@ export const treatments: Treatment[] = [
       precautions:
         "La cantidad y plano de aplicación se definen tras valorar proporciones, soporte y calidad de piel.",
     },
-    image: "/images/tratamiento-1.jpeg",
+    image: "/images/tratamiento-facial-foto.jpeg",
   },
   {
     slug: "menton",
@@ -385,7 +385,7 @@ export const treatments: Treatment[] = [
       precautions:
         "Se revisa mordida, proporción facial y objetivo estético antes de indicar el tratamiento.",
     },
-    image: "/images/tratamiento-2.jpeg",
+    image: "/images/tratamiento-facial-foto.jpeg",
   },
   {
     slug: "sculptra-facial",
@@ -424,7 +424,7 @@ export const treatments: Treatment[] = [
       precautions:
         "La indicación depende de flacidez, calidad de piel, antecedentes y expectativas de mejora progresiva.",
     },
-    image: "/images/tratamiento-3.jpeg",
+    image: "/images/tratamiento-neuromoduladores-foto.jpeg",
   },
   {
     slug: "sculptra-gluteos",
@@ -463,7 +463,7 @@ export const treatments: Treatment[] = [
       precautions:
         "Se valora flacidez, calidad de piel, volumen disponible y expectativas antes de definir el plan.",
     },
-    image: "/images/tratamiento-1.jpeg",
+    image: "/images/tratamiento-facial-foto.jpeg",
   },
   {
     slug: "sculptra-abdomen",
@@ -502,7 +502,7 @@ export const treatments: Treatment[] = [
       precautions:
         "Se revisa calidad de piel, flacidez, antecedentes y objetivos antes de indicar el tratamiento.",
     },
-    image: "/images/tratamiento-2.jpeg",
+    image: "/images/tratamiento-facial-foto.jpeg",
   },
 ];
 
