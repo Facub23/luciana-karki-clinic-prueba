@@ -23,13 +23,8 @@ export const defaultPromotions: PromotionItem[] = [
     shape: "tall",
   },
   {
-    src: "/images/peeling-axilas-1.png",
-    alt: "Foto de tratamiento de axilas",
-    shape: "compact",
-  },
-  {
-    src: "/images/peeling-axilas-2.png",
-    alt: "Foto de peeling corporal en axilas",
+    src: "/images/tratamiento-4.png",
+    alt: "Promoción peeling axilas y zona íntima",
     shape: "tall",
   },
 ];
