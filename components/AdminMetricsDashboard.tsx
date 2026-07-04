@@ -90,17 +90,19 @@ export default function AdminMetricsDashboard({
             <h2 className="text-lg font-semibold text-[#5f4d56]">
               Leads últimos 14 días
             </h2>
-            <div className="mt-5 flex h-64 items-end gap-2">
-              {byDay.map((item) => (
-                <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
-                  <div
-                    className="w-full rounded-t bg-[#c98fa1]"
-                    style={{ height: `${Math.max((item.value / maxDay) * 210, 6)}px` }}
-                    title={`${item.label}: ${item.value}`}
-                  />
-                  <span className="text-[11px] text-gray-500">{item.label}</span>
-                </div>
-              ))}
+            <div className="mt-5 max-w-full overflow-x-auto pb-2">
+              <div className="flex h-64 min-w-[520px] items-end gap-2">
+                {byDay.map((item) => (
+                  <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
+                    <div
+                      className="w-full rounded-t bg-[#c98fa1]"
+                      style={{ height: `${Math.max((item.value / maxDay) * 210, 6)}px` }}
+                      title={`${item.label}: ${item.value}`}
+                    />
+                    <span className="text-[11px] text-gray-500">{item.label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
 
