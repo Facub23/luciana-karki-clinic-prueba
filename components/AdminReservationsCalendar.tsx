@@ -424,7 +424,7 @@ export default function AdminReservationsCalendar({
           <div className="mt-5 flex flex-wrap gap-2 rounded-lg border border-[#ead1d9] bg-[#fffafb] p-2">
             {[
               ["all", "Todas"],
-              ["upcoming", "Proximas"],
+              ["upcoming", "Próximas"],
               ["past", "Pasadas"],
             ].map(([value, label]) => (
               <button
@@ -504,7 +504,7 @@ export default function AdminReservationsCalendar({
                     ))}
                     {dayReservations.length > 2 ? (
                       <p className="text-[11px] text-gray-500">
-                        +{dayReservations.length - 2} mas
+                        +{dayReservations.length - 2} más
                       </p>
                     ) : null}
                   </div>
@@ -542,7 +542,7 @@ export default function AdminReservationsCalendar({
                           value={editPhone}
                           onChange={(event) => setEditPhone(event.target.value)}
                           className="w-full rounded-lg border border-[#ead1d9] bg-white px-3 py-2 text-sm outline-none focus:border-[#c98fa1] focus:ring-4 focus:ring-[#efd8df]"
-                          placeholder="Telefono"
+                          placeholder="Teléfono"
                         />
                         <input
                           value={editTreatment}
@@ -673,7 +673,7 @@ export default function AdminReservationsCalendar({
               <input
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
-                placeholder="Telefono"
+                placeholder="Teléfono"
                 className="w-full rounded-lg border border-[#ead1d9] bg-[#fffafb] px-3 py-2.5 text-sm outline-none focus:border-[#c98fa1] focus:ring-4 focus:ring-[#efd8df]"
               />
               <input
