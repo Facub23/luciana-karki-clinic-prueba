@@ -86,11 +86,11 @@ export default function AdminMetricsDashboard({
         </div>
 
         <div className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]">
-          <section className="rounded-lg border border-[#ead1d9] bg-white p-5 shadow-sm">
+          <section className="min-w-0 rounded-lg border border-[#ead1d9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold text-[#5f4d56]">
               Leads últimos 14 días
             </h2>
-            <div className="mt-5 max-w-full overflow-x-auto pb-2">
+            <div className="mt-5 min-w-0 max-w-full overflow-x-auto pb-2">
               <div className="flex h-64 min-w-[520px] items-end gap-2">
                 {byDay.map((item) => (
                   <div key={item.label} className="flex flex-1 flex-col items-center gap-2">
@@ -106,7 +106,7 @@ export default function AdminMetricsDashboard({
             </div>
           </section>
 
-          <section className="rounded-lg border border-[#ead1d9] bg-white p-5 shadow-sm">
+          <section className="min-w-0 rounded-lg border border-[#ead1d9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold text-[#5f4d56]">
               Estado de leads
             </h2>
@@ -119,7 +119,7 @@ export default function AdminMetricsDashboard({
         </div>
 
         <div className="grid gap-5 xl:grid-cols-2">
-          <section className="rounded-lg border border-[#ead1d9] bg-white p-5 shadow-sm">
+          <section className="min-w-0 rounded-lg border border-[#ead1d9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold text-[#5f4d56]">
               Tratamientos más consultados
             </h2>
@@ -130,7 +130,7 @@ export default function AdminMetricsDashboard({
             </div>
           </section>
 
-          <section className="rounded-lg border border-[#ead1d9] bg-white p-5 shadow-sm">
+          <section className="min-w-0 rounded-lg border border-[#ead1d9] bg-white p-5 shadow-sm">
             <h2 className="text-lg font-semibold text-[#5f4d56]">
               Fuentes y campañas
             </h2>
