@@ -1,0 +1,31 @@
+services:
+  - type: web
+    name: luciana-karki-clinic
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:render
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 24
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ADMIN_SESSION_SECRET
+        generateValue: true
+      - key: LEAD_NOTIFICATION_EMAIL_TO
+        sync: false
+      - key: LEAD_NOTIFICATION_EMAIL_FROM
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: GOOGLE_SHEETS_WEBHOOK_URL
+        sync: false
+      - key: NEXT_PUBLIC_GTM_ID
+        sync: false
