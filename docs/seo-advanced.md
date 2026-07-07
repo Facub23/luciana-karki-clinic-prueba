@@ -6,31 +6,30 @@ La web incluye una capa SEO profesional:
 - Metadata por tratamiento.
 - Canonical URLs.
 - OpenGraph y Twitter cards.
-- `sitemap.xml` dinámico.
-- `robots.txt` dinámico.
+- `sitemap.xml` dinamico.
+- `robots.txt` dinamico.
 - JSON-LD para `MedicalClinic`.
-- JSON-LD para cada tratamiento como `MedicalProcedure`.
+- JSON-LD por tratamiento como `MedicalProcedure`.
 
-## Dominio
-
-Antes de publicar, configurar:
+## Dominio oficial
 
 ```env
-NEXT_PUBLIC_SITE_URL=https://dominio-final.com
+NEXT_PUBLIC_SITE_URL=https://dralucianakarki.com
 ```
 
-Si no se configura, el sitio usa un dominio placeholder.
+Esta variable ya esta configurada en Render. Si algun dia cambia el dominio,
+hay que actualizarla y redeployar.
 
 ## Rutas generadas
 
-- `/sitemap.xml`
-- `/robots.txt`
-- `/tratamientos/[slug]`
+- `https://dralucianakarki.com/sitemap.xml`
+- `https://dralucianakarki.com/robots.txt`
+- `https://dralucianakarki.com/tratamientos/[slug]`
 
-## Pendiente manual
+## Pendiente manual para SEO
 
-- Confirmar dominio final.
-- Confirmar textos finales con la doctora.
-- Confirmar precios reales.
-- Confirmar imágenes definitivas para compartir en redes.
-- Enviar `/sitemap.xml` a Google Search Console después de publicar.
+- Crear propiedad en Google Search Console.
+- Verificar el dominio o la URL.
+- Enviar `https://dralucianakarki.com/sitemap.xml`.
+- Conectar GA4 y Google Ads desde GTM.
+- Revisar rendimiento cuando Google empiece a indexar.

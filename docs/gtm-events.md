@@ -1,24 +1,34 @@
-# Eventos GTM, GA4 y Google Ads
+# Google Tag Manager, GA4 y Google Ads
 
-La web ya queda preparada para medición por Google Tag Manager. No hay que tocar
-código para conectar Google Ads: solo configurar el contenedor GTM y cargar el ID
-en la variable `NEXT_PUBLIC_GTM_ID`.
+La web ya esta preparada para medicion por Google Tag Manager. No hace falta
+tocar codigo para conectar GA4 o Google Ads: solo hay que cargar el ID del
+contenedor GTM en Render.
 
-## Variable necesaria
+## Variable necesaria en Render
 
 ```env
 NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
 ```
 
-Cuando el sitio esté publicado en el dominio real, agregar esa variable en Vercel
-y redeployar. Si también se instala GTM en WordPress, usar el mismo contenedor o
-documentar cuál contenedor mide cada propiedad.
+Ruta en Render:
+
+1. Abrir el servicio `luciana-karki-clinic-prueba`.
+2. Entrar en `Environment`.
+3. Editar o agregar `NEXT_PUBLIC_GTM_ID`.
+4. Guardar con `Save, rebuild, and deploy`.
+5. Esperar a que el deploy termine.
+
+El dominio oficial de la web es:
+
+```text
+https://dralucianakarki.com
+```
 
 ## Eventos disponibles
 
 ### `generate_lead`
 
-Evento estándar recomendado para GA4 y Google Ads. Se dispara solo cuando el
+Evento principal recomendado para GA4 y Google Ads. Se dispara solo cuando el
 formulario se guarda correctamente.
 
 Campos:
@@ -29,13 +39,13 @@ Campos:
 
 Uso recomendado:
 
-- Marcar como conversión principal en GA4.
-- Importar esa conversión desde Google Ads o disparar una etiqueta de conversión
-  de Google Ads desde GTM.
+- Marcar como conversion principal en GA4.
+- Importar esa conversion desde Google Ads o disparar una etiqueta de
+  conversion de Google Ads desde GTM.
 
 ### `lead_form_submit`
 
-Se dispara después de intentar guardar el formulario, tanto si sale bien como si
+Se dispara despues de intentar guardar el formulario, tanto si sale bien como si
 falla.
 
 Campos:
@@ -47,8 +57,8 @@ Campos:
 Uso recomendado:
 
 - Crear un trigger en GTM para `lead_form_submit`.
-- Filtrar `status equals saved` si se quiere usar como conversión.
-- Usarlo también para depurar errores de formularios.
+- Filtrar `status equals saved` si se quiere usar como conversion.
+- Usarlo tambien para depurar errores de formularios.
 
 ### `whatsapp_click`
 
@@ -63,12 +73,12 @@ Campos:
 
 Uso recomendado:
 
-- Conversión secundaria.
+- Conversion secundaria.
 - Audiencia de remarketing.
 
 ### `treatment_interest`
 
-Se dispara cuando el usuario abre una página de tratamiento desde la grilla o el
+Se dispara cuando el usuario abre una pagina de tratamiento desde la grilla o el
 footer.
 
 Campos:
@@ -79,26 +89,35 @@ Campos:
 
 Uso recomendado:
 
-- Audiencias por interés de tratamiento.
-- Medición de tratamientos más consultados.
+- Audiencias por interes de tratamiento.
+- Medicion de tratamientos mas consultados.
 
-## Configuración recomendada en GTM
+### `footer_legal_click`
 
-1. Crear etiqueta de GA4 Configuration con el Measurement ID de GA4.
-2. Crear eventos GA4:
+Se dispara cuando el usuario abre enlaces legales del footer.
+
+Uso recomendado:
+
+- Evento informativo, no conversion.
+
+## Configuracion recomendada en GTM
+
+1. Crear una etiqueta de GA4 Configuration con el Measurement ID de GA4.
+2. Crear triggers de tipo `Custom Event` para:
    - `generate_lead`
    - `lead_form_submit`
    - `whatsapp_click`
    - `treatment_interest`
-3. Crear trigger de Custom Event para cada nombre de evento.
-4. Marcar `generate_lead` como conversión en GA4.
-5. Vincular GA4 con Google Ads e importar la conversión `generate_lead`.
-6. Opcional: crear una conversión secundaria para `whatsapp_click`.
+3. Crear etiquetas GA4 Event para esos eventos.
+4. Marcar `generate_lead` como conversion en GA4.
+5. Vincular GA4 con Google Ads.
+6. Importar la conversion `generate_lead` en Google Ads.
+7. Opcional: usar `whatsapp_click` como conversion secundaria.
 
-## Configuración directa de Google Ads desde GTM
+## Configuracion directa de Google Ads desde GTM
 
-Si no quieren importar conversiones desde GA4, pueden crear una etiqueta de
-Google Ads Conversion Tracking en GTM:
+Si prefieren no importar conversiones desde GA4, crear una etiqueta de Google
+Ads Conversion Tracking en GTM:
 
 - Trigger: Custom Event `generate_lead`
 - Conversion ID: provisto por Google Ads
@@ -107,18 +126,31 @@ Google Ads Conversion Tracking en GTM:
 Para WhatsApp:
 
 - Trigger: Custom Event `whatsapp_click`
-- Usarlo como conversión secundaria o solo remarketing.
+- Usarlo como conversion secundaria o solo para remarketing.
+
+## WordPress
+
+La web nueva no depende de WordPress. Si existe una web antigua en WordPress y
+tambien quieren medirla, instalar alli el mismo contenedor GTM o documentar que
+contenedor mide cada web.
+
+Recomendacion:
+
+- Web nueva en Render: usar `NEXT_PUBLIC_GTM_ID`.
+- WordPress antiguo: instalar GTM con Site Kit o un plugin de GTM.
+- Evitar duplicar el mismo GTM dos veces en la misma web.
 
 ## Prueba final
 
 1. Abrir Tag Assistant.
-2. Enviar un formulario de prueba.
-3. Confirmar que aparecen:
+2. Conectar con `https://dralucianakarki.com`.
+3. Enviar un formulario de prueba.
+4. Confirmar que aparecen:
    - `lead_form_submit`
    - `generate_lead`
-   - `whatsapp_click`
-4. Confirmar que el lead entra en:
+   - `whatsapp_click`, si se abre WhatsApp
+5. Confirmar que el lead entra en:
    - panel admin
    - Google Sheets
    - email
-5. En GA4 DebugView, confirmar que llega `generate_lead`.
+6. En GA4 DebugView, confirmar que llega `generate_lead`.
