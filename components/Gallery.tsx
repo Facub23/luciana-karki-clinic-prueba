@@ -14,11 +14,11 @@ export default function Gallery({ promotions = defaultPromotions }: GalleryProps
       <div className="mx-auto max-w-7xl px-6">
         <div className="mx-auto mb-12 max-w-3xl text-center">
           <span className="text-sm uppercase tracking-[0.3em] text-[#d9a8b5]">
-            Promociones
+            Especial verano
           </span>
 
           <h2 className="mt-4 text-4xl font-light text-[#6b5b63] sm:text-5xl">
-            Campañas destacadas
+            Precio exclusivo verano
           </h2>
         </div>
 
